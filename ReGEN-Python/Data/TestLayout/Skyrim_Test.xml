@@ -1,4 +1,4 @@
-<test name="Full_Test" save_output="True">
+<test name="Skyrim_Test" save_output="True">
 	<socialgraph>Skyrim</socialgraph>
 	<initializationrules>
 		<initializationrule>Assassinate</initializationrule>

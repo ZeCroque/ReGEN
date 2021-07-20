@@ -1,8 +1,4 @@
 <rule name="Give_Blackmail_Letter" type="Initialization_Rule">
-	<socialcondition>
-		Give_Blackmail_Letter_Social_Condition
-	</socialcondition>
-	<storymodification>
-		Give_Blackmail_Letter_Story_Modification
-	</storymodification>
+  <socialcondition>Give_Blackmail_Letter_Social_Condition</socialcondition>
+  <storymodification>Give_Blackmail_Letter_Story_Modification</storymodification>
 </rule>

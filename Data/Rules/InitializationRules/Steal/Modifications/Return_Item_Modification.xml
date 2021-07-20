@@ -1,11 +1,11 @@
 <Modification>
-	<Method name="new_owner" self="Object">
-		<args>
-			<dict>
-				<dict_element key="ref" type="str" value="Thief" />
-			</dict>
-			<str value="Stolen" />
-			<str value="Stolen" />
-		</args>
-	</Method>
+  <Method name="new_owner" self="Object">
+    <args>
+      <dict>
+        <dict_element key="ref" type="str" value="Thief"/>
+      </dict>
+      <str value="Stolen"/>
+      <str value="Stolen"/>
+    </args>
+  </Method>
 </Modification>

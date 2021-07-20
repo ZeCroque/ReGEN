@@ -1,8 +1,4 @@
 <rule name="Murder" type="Initialization_Rule">
-	<socialcondition>
-		Murder_Social_Condition
-	</socialcondition>
-	<storymodification>
-		Murder_Story_Modification
-	</storymodification>
+  <socialcondition>Murder_Social_Condition</socialcondition>
+  <storymodification>Murder_Story_Modification</storymodification>
 </rule>

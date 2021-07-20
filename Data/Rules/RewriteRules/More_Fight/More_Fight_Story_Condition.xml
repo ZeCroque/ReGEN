@@ -1,1 +1,9 @@
-<graph name="More_Fight_Story_Condition" type="Story_Graph"><nodes><node modification="Fight_Modification.xml" name="Fight"><target>Monster</target><nodetype>Fight</nodetype></node></nodes><connections /></graph>
+<graph name="More_Fight_Story_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="Fight_Modification.xml" name="Fight">
+      <target>Monster</target>
+      <nodetype>Fight</nodetype>
+    </node>
+  </nodes>
+  <connections/>
+</graph>

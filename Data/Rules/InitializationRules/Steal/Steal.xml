@@ -1,8 +1,4 @@
 <rule name="Steal" type="Initialization_Rule">
-	<socialcondition>
-		Steal_Social_Condition
-	</socialcondition>
-	<storymodification>
-		Steal_Story_Modification
-	</storymodification>
+  <socialcondition>Steal_Social_Condition</socialcondition>
+  <storymodification>Steal_Story_Modification</storymodification>
 </rule>

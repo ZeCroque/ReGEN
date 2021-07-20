@@ -1,11 +1,11 @@
 <Modification>
-	<Method name="add_edge" self="Recipient">
-		<args>
-			<dict>
-				<dict_element key="ref" type="str" value="Invoker" />
-			</dict>
-			<str value="Loves" />
-			<str value="Gave_Gift" />
-		</args>
-	</Method>
+  <Method name="add_edge" self="Recipient">
+    <args>
+      <dict>
+        <dict_element key="ref" type="str" value="Invoker"/>
+      </dict>
+      <str value="Loves"/>
+      <str value="Gave_Gift"/>
+    </args>
+  </Method>
 </Modification>

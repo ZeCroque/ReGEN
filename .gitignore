@@ -1,5 +1,8 @@
 *.pyc
 .vscode/
-Output/
+[Oo]utput/
 [Bb]uild/
+
+*.ignore.*
+*.ignore/
 !.keepme

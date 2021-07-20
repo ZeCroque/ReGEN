@@ -38,5 +38,6 @@
 		<metric name="average_path"></metric>
 		<metric name="per_path_encounter_metrics"></metric>
 		<metric name="per_path_uniqueness_metrics"></metric>
-		<metric name="repetitivity"></metric></metricstoanalyze>
+		<metric name="repetitivity"></metric>
+	</metricstoanalyze>
 </test>

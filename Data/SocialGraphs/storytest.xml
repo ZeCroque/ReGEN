@@ -2,14 +2,24 @@
 	<nodes>
 		<node name="Murder_Innocent">
 			<attr name="Number_of_Stabs" type="int">
-				<value>3</value>
+				<value>
+					3
+				</value>
 			</attr>
-			<nodetype>Murder</nodetype>
-			<target>Filthy_Phil</target>
+			<nodetype>
+				Murder
+			</nodetype>
+			<target>
+				Filthy_Phil
+			</target>
 		</node>
 		<node name="Return_Home">
-			<nodetype>Return</nodetype>
-			<target>Main_Town</target>
+			<nodetype>
+				Return
+			</nodetype>
+			<target>
+				Main_Town
+			</target>
 		</node>
 	</nodes>
 	<connections>

@@ -1,4 +1,5 @@
 *.pyc
-*/Output/
-!*.keepme
 .vscode/
+Output/
+[Bb]uild/
+!.keepme

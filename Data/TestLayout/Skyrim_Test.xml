@@ -19,32 +19,15 @@
 	    <rewriterule>Spare</rewriterule>
 	    <rewriterule>Stealth_Kill</rewriterule>
 	</rewriterules>
-	<numstoriestogenerate>3</numstoriestogenerate>
-	<maxnumberofrewrites>1</maxnumberofrewrites>
+	<numstoriestogenerate>10</numstoriestogenerate>
+	<maxnumberofrewrites>100</maxnumberofrewrites>
 	<metricstooptimize>
 		<metric name="fights" weight="1" ></metric>
 		<metric name="repetitivity" weight="1"></metric>
 		<metric name="longest_path" weight="1"></metric>
 		<metric name="shortest_path" weight="-1"></metric>
-		<metric name="highest_cost" weight="-1"></metric>
-		<metric name="lowest_cost" weight="1"></metric>
+		<metric name="num_branches" weight="1"></metric>
 	</metricstooptimize>
 	<metricstoanalyze>
-		<metric name="longest_path"></metric>
-		<metric name="shortest_path"></metric>
-		<metric name="highest_cost"></metric>
-		<metric name="lowest_cost"></metric>
-		<metric name="attr_preconditions"></metric>
-		<metric name="edge_preconditions"></metric>
-		<metric name="number_of_nodes"></metric>
-		<metric name="number_of_edges"></metric>
-		<metric name="num_branches"></metric>
-		<metric name="fights"></metric>
-		<metric name="repetition"></metric>
-		<metric name="unique_node_types"></metric>
-		<metric name="per_path_branch_metrics"></metric>
-		<metric name="average_cost"></metric>
-		<metric name="average_path"></metric>
-		<metric name="per_path_encounter_metrics"></metric>
-		<metric name="per_path_uniqueness_metrics"></metric>
-		<metric name="repetitivity"></metric></metricstoanalyze></test>
+	</metricstoanalyze>
+</test>

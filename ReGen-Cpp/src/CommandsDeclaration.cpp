@@ -1,17 +1,14 @@
 #include "CommandsDeclaration.h"
 
-#include <cassert>
-#include <string>
-
 #include "CommandsRegistry.h"
 
 void declareCommands()
 {	
-	auto* commandRegistry = CommandManager::getInstance();
+	auto* commandRegistry = CommandRegistry::getInstance();
 	const std::hash<std::string> hasher;
 	
 	/*******************************************************************************
-	 * Remove victim realtions (usually called) after it dies
+	 * Remove victim relations (usually called after it dies)
 	 *
 	 * @param ref murderer
 	 ******************************************************************************/	

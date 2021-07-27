@@ -1,8 +1,6 @@
 #include "CommandsRegistry.h"
 
-#include <cassert>
-
-void CommandManager::registerCommand(const size_t inKey, Command* inObject) const
+void CommandRegistry::registerCommand(const size_t inKey, Command* inObject) const
 {	
 	if (commands.find(inKey) == commands.end())
 	{
@@ -12,17 +10,17 @@ void CommandManager::registerCommand(const size_t inKey, Command* inObject) cons
 	assert(false);	
 }
 
-void CommandManager::executeCommand(const size_t inKey, std::vector<std::any>& args) const
+void CommandRegistry::executeCommand(const size_t inKey, std::vector<std::any>& args) const
 {
 	find(inKey)->implementation(args);
 }
 
-Conditions CommandManager::getCommandConditions(const size_t inKey, std::vector<std::any>& args) const
+Conditions CommandRegistry::getCommandConditions(const size_t inKey, std::vector<std::any>& args) const
 {
 	return find(inKey)->conditionConstructor(args);
 }
 
-Command* CommandManager::find(const size_t inKey) const
+Command* CommandRegistry::find(const size_t inKey) const
 {
 	Command* result = nullptr;
 	if (const auto command = commands.find(inKey); command != commands.end())

@@ -11,12 +11,14 @@ set(HEADERS
     ${HEADER_DIR}/PCH.h
 	${HEADER_DIR}/CommandsRegistry.h
     ${HEADER_DIR}/CommandsDeclaration.h
+    ${HEADER_DIR}/DataManager.h
 )
 
 set(SOURCES
 	${SOURCE_DIR}/main.cpp
     ${SOURCE_DIR}/CommandsRegistry.cpp
     ${SOURCE_DIR}/CommandsDeclaration.cpp
+    ${SOURCE_DIR}/DataManager.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

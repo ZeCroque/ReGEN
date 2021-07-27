@@ -22,9 +22,9 @@ struct Command
 };
 
 
-class CommandManager final : public Singleton<CommandManager>
+class CommandRegistry final : public Singleton<CommandRegistry>
 {
-	friend class Singleton<CommandManager>;
+	friend class Singleton<CommandRegistry>;
 
 public:
 	void registerCommand(size_t inKey, Command* inObject) const;

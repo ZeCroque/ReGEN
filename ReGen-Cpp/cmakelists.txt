@@ -8,11 +8,15 @@ set(HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/includes)
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 set(HEADERS
-	#${HEADER_DIR}/...
+    ${HEADER_DIR}/PCH.h
+	${HEADER_DIR}/CommandsRegistry.h
+    ${HEADER_DIR}/CommandsDeclaration.h
 )
 
 set(SOURCES
 	${SOURCE_DIR}/main.cpp
+    ${SOURCE_DIR}/CommandsRegistry.cpp
+    ${SOURCE_DIR}/CommandsDeclaration.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
@@ -25,6 +29,11 @@ target_link_libraries(${PROJECT_NAME}
         pugixml
         pugixml::shared
         pugixml::pugixml
+        DesignPattern
+)
+target_precompile_headers(${PROJECT_NAME}
+    PUBLIC
+        ${HEADER_DIR}/PCH.h
 )
 
 #Move assets to build dir

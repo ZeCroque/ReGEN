@@ -33,7 +33,6 @@ class StoryNode(Node):
 		#Preconditions and Postconditions of the node
 		self._preconditions = []
 		self._postconditions = []
-		self._lostconditions = []
 		
 		#Flags used for our new condition based rewriting
 		self._permanent_no_use = False
@@ -132,54 +131,11 @@ class StoryNode(Node):
 	def add_postconditions(self, postconditions):
 		self._postconditions.extend(postconditions)
 	
-	def get_lostconditions(self):
-		return self._lostconditions
-	
-	def set_lostconditions(self, lostconditions):
-		self._lostconditions = lostconditions
-		
-	def add_lostcondition(self, lostcondition):
-		self._lostconditions.append(lostcondition)
-	
-	def add_lostconditions(self, lostconditions):
-		self._lostconditions.extend(lostconditions)
-	
 	def exists_conflict(self, condition, check_against):
 		for cond in check_against:
 			if condition.conflicts(cond):
 				return True, cond
 		return False, None
-
-	def refine(self, conditions):
-
-		#The First step is to check and resolve conflicts between previous node's postconditions
-		#and lost conditions
-		for condition in conditions:
-			exists, to_replace = self.exists_conflict(condition, self._lostconditions) 
-			if exists:
-				self._lostconditions.remove(to_replace)
-				self._lostconditions.append(condition)
-		
-		#The second step is to check and resolve conflicts between the current node's postconditions
-		#and lost conditions (we ONLY do this for numerical resolutions)
-		for condition in self._postconditions:
-			if type(condition.get_value()).__name__ == "int":
-				exists, conflicted_conditions = self.exists_conflict(condition, self._lostconditions)
-				if exists:
-					condition.set_value(condition.get_value() + conflicted_conditions.get_value())
-		#The last step is to prepare the postconditions to carry down by only taking unconflicting
-		#conditions
-		temp_postconditions = []
-		for condition in conditions:
-			exists, conflicted_condition = self.exists_conflict(condition, self._postconditions)
-			if not exists:
-				temp_postconditions.append(condition)
-		
-		temp_postconditions.extend(self._postconditions)
-		#for condition in conditions:
-			
-		for edge in self._outgoing_edges:
-			edge.get_to_node().refine(temp_postconditions)
 
 	def validate(self, preconditions_to_check, valid):
 		

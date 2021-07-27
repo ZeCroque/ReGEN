@@ -95,7 +95,6 @@ class SocialNode(Node):
 			
 			pre_conditions = []
 			new_conditions = []
-			lost_conditions = []
 			
 			"""
 			precondition = Condition(False)
@@ -114,9 +113,8 @@ class SocialNode(Node):
 			pre_conditions.extend(preconditions)
 			new_conditions.extend(postconditions)
 
-			lost_conditions.extend(self.convert_all_edges_to_condition(False))
 			
-			return pre_conditions, new_conditions, lost_conditions
+			return pre_conditions, new_conditions
 		
 	"""Used if a character dies (or object is removed from world
 	
@@ -131,9 +129,7 @@ class SocialNode(Node):
 		
 			return to_remove, []
 		else:
-			lost_conditions = []
-			lost_conditions.extend(self.convert_all_edges_to_condition(False))
-			return [], [], lost_conditions
+			return [], []
 
 	"""Set the other nodes relations in relation to this character
 	
@@ -165,7 +161,7 @@ class SocialNode(Node):
 			reason = method_array[3]
 			
 			Preconditions, Conditions = self.get_node_relations(original_relations, ref_node, new_relation, reason, True)
-			return Preconditions, Conditions, []
+			return Preconditions, Conditions
 			
 	"""Move the Player
 	
@@ -182,7 +178,6 @@ class SocialNode(Node):
 			
 			return [], []
 		else:
-			lost_condition = self.get_outgoing_edges()[0].edge_to_condition()
 			
 			condition = Condition(False)
 			condition.set_first_object(self)
@@ -190,7 +185,7 @@ class SocialNode(Node):
 			condition.set_key(self.get_outgoing_edges()[0].get_key())
 			condition.set_value(self.get_outgoing_edges()[0].get_value())
 			
-			return [], [condition], [lost_condition]
+			return [], [condition]
 
 	"""Add an Edge
 	
@@ -218,7 +213,7 @@ class SocialNode(Node):
 			condition.set_key(key)
 			condition.set_value(value)
 			
-			return [], [condition], []
+			return [], [condition]
 
 	"""Move the Player to a specific node's location
 	
@@ -241,15 +236,13 @@ class SocialNode(Node):
 			who = who[0]
 			where = who.get_to_node_from_outgoing_edge_name({"Lives" : "N/A"})
 			
-			lost_condition = self.get_outgoing_edges()[0].edge_to_condition()
-			
 			condition = Condition(False)
 			condition.set_first_object(self)
 			condition.set_second_object(where)
 			condition.set_key(self.get_outgoing_edges()[0].get_key())
 			condition.set_value(self.get_outgoing_edges()[0].get_value())
 			
-			return [], [condition], [lost_condition]
+			return [], [condition]
 		
 	"""Kill an Enemy (non-NPC character)
 	
@@ -273,7 +266,6 @@ class SocialNode(Node):
 			enemy = enemy[0]
 			pre_conditions = []
 			new_conditions = []
-			lost_conditions = []
 			
 			precondition = Condition(True, True, ">")
 			precondition.set_first_object(enemy)
@@ -289,11 +281,7 @@ class SocialNode(Node):
 #			precondition2.set_value("N/A")
 #			pre_conditions.append(precondition2)
 			
-			if enemy.get_attributes()["number"] <= 1:
-
-				lost_conditions.append(enemy.attribute_to_comparator_condition('number'))
-				lost_conditions.append(enemy.attribute_to_condition('type'))
-				
+			if enemy.get_attributes()["number"] <= 1:				
 				condition = Condition(True, True, "=")
 				condition.set_first_object(enemy)
 				condition.set_key("number")
@@ -307,8 +295,7 @@ class SocialNode(Node):
 				new_conditions.append(condition2)
 				
 			else:
-				
-				lost_conditions.append(enemy.attribute_to_comparator_condition('number'))
+		
 				
 				condition = Condition(True, True, "=")
 				condition.set_first_object(enemy)
@@ -318,7 +305,7 @@ class SocialNode(Node):
 				
 				new_conditions.append(condition)
 				
-			return pre_conditions, new_conditions, lost_conditions		
+			return pre_conditions, new_conditions		
 	"""For an owned object, switch ownership
 	
 	Args:
@@ -356,8 +343,7 @@ class SocialNode(Node):
 			
 			pre_conditions = []
 			new_conditions = []
-			lost_conditions = []
-			
+
 			precondition = Condition(False)
 			precondition.set_first_object(self)
 			who = self.get_from_node_from_incoming_edge_name({"Owns" : "N/A"})
@@ -366,9 +352,6 @@ class SocialNode(Node):
 			precondition.set_key("Currently_In")
 			precondition.set_value("N/A")
 			pre_conditions.append(precondition)
-
-			lost_conditions.append(self.attribute_to_condition('status'))
-			lost_conditions.extend(self.convert_all_edges_to_condition(True))
 			
 			condition = Condition(True)
 			condition.set_first_object(self)
@@ -383,7 +366,7 @@ class SocialNode(Node):
 			condition2.set_value(own_reason)	
 			new_conditions.append(condition2)
 			
-			return pre_conditions, new_conditions, lost_conditions
+			return pre_conditions, new_conditions
 	
 	def give_Item(self, input_array):
 		if not self._condition_only:
@@ -412,7 +395,6 @@ class SocialNode(Node):
 			
 			pre_conditions = []
 			new_conditions = []
-			lost_conditions = []
 			
 			precondition = Condition(False)
 			precondition.set_first_object(self)
@@ -422,7 +404,6 @@ class SocialNode(Node):
 			precondition.set_value("N/A")
 			pre_conditions.append(precondition)
 
-			lost_conditions.extend(item.convert_all_edges_to_condition(True))
 			
 			condition2 = Condition(False)
 			condition2.set_first_object(new_owner)
@@ -431,7 +412,7 @@ class SocialNode(Node):
 			condition2.set_value(own_reason)	
 			new_conditions.append(condition2)
 			
-			return pre_conditions, new_conditions, lost_conditions
+			return pre_conditions, new_conditions
 		
 	def take_Item(self, input_array):
 		if not self._condition_only:
@@ -460,7 +441,6 @@ class SocialNode(Node):
 			
 			pre_conditions = []
 			new_conditions = []
-			lost_conditions = []
 			
 			precondition = Condition(False)
 			precondition.set_first_object(self)
@@ -469,8 +449,6 @@ class SocialNode(Node):
 			precondition.set_key("Currently_In")
 			precondition.set_value("N/A")
 			pre_conditions.append(precondition)
-
-			lost_conditions.extend(item.convert_all_edges_to_condition(True))
 			
 			condition2 = Condition(False)
 			condition2.set_first_object(self)
@@ -479,7 +457,7 @@ class SocialNode(Node):
 			condition2.set_value(own_reason)	
 			new_conditions.append(condition2)
 			
-			return pre_conditions, new_conditions, lost_conditions
+			return pre_conditions, new_conditions
 			
 	def talk(self, input_array):
 		if not self._condition_only:
@@ -494,7 +472,7 @@ class SocialNode(Node):
 			condition.set_key("Currently_In")
 			condition.set_value("N/A")
 			
-			print [condition], [], []
+			return [condition], []
 			
 	"""The Copy Function
 	"""

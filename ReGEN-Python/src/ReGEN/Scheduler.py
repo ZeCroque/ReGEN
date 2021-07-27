@@ -230,7 +230,6 @@ class Scheduler:
 		narrative.fix_graph()
 		self._social_graph.make_node_postconditions(narrative)
 		narrative.initialize_conditions()
-		narrative.refine_lost_conditions()
 		
 		print "Validating Final Story\n"
 
@@ -244,9 +243,6 @@ class Scheduler:
 				print "\nPostconditions for " + node.get_name()
 				for con in node.get_postconditions():
 					print con
-				print "\nLost Conditions for " + node.get_name()
-				for con in node.get_lostconditions():
-					print con	
 				print "\n" + self._divider	
 		
 		valid = narrative.validate_story()
@@ -411,7 +407,6 @@ class Scheduler:
 		
 		self._social_graph.make_node_postconditions(self._final_narrative)
 		self._final_narrative.initialize_conditions()
-		self._final_narrative.refine_lost_conditions()
 		
 		print "-------------------------------------------------\n"
 		for node in self._final_narrative.get_nodes():
@@ -422,10 +417,6 @@ class Scheduler:
 			print "\nPostconditions for " + node.get_name()
 			for con in node.get_postconditions():
 				print con
-			print "\nLost Conditions for " + node.get_name()
-			for con in node.get_lostconditions():
-				print con	
-			print "\n-------------------------------"		
 		
 		#-----------------------------------
 		#Begin the process of rewriting the narrative

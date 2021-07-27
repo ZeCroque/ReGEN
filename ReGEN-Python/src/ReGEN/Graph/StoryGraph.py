@@ -223,16 +223,6 @@ class StoryGraph(Graph):
 	def initialize_conditions(self):
 		self.get_start_node().set_preconditions(self._preconditions)
 	
-	def refine_lost_conditions(self):
-		
-		starting_nodes = []
-		
-		for node in self._nodes:
-			if len(node.get_incoming_edges()) == 0:
-				starting_nodes.append(node)
-				
-		for start_node in starting_nodes:
-			start_node.refine([])
 		
 	"""Begin the process of applying node pre/post conditions
 	"""

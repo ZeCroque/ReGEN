@@ -197,12 +197,11 @@ class SocialGraph(Graph):
 					#Get the modified edges from the method
 					new_method = method_self.get_function_from_name(str(method["name"]))
 
-					pre_conditions, new_conditions, lost_conditions = new_method(method_self, arg_list)
+					pre_conditions, new_conditions = new_method(method_self, arg_list)
 					method_self.set_condition_only(False)
 						
 					node.add_preconditions(pre_conditions)
 					node.add_postconditions(new_conditions)
-					node.add_lostconditions(lost_conditions)
 					
 				#If our modification is an attribute switch
 				elif mod.keys()[0] == "Attribute":

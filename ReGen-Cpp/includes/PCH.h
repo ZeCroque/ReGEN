@@ -6,10 +6,11 @@
 
 #ifndef NDEBUG
 #include <iostream>
-
-#define DBG(message) std::cout << (message) << std::endl // NOLINT(cppcoreguidelines-macro-usage)
+#define PRINTLN(message) std::cout << (message) << std::endl // NOLINT(cppcoreguidelines-macro-usage)
+#define PRINT(message) std::cout << (message) // NOLINT(cppcoreguidelines-macro-usage)
 #else
-#define DBG(message)
+#define PRINTLN(message)
+#define PRINT(message)
 #endif
 
 

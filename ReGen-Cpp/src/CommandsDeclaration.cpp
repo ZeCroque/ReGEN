@@ -17,7 +17,7 @@ void declareCommands()
 		[](std::vector<std::any>& args)
 		{
 			assert(args.size() == 1);
-			DBG(std::any_cast<std::string>(args[0]));
+			PRINTLN(std::any_cast<std::string>(args[0]));
 		},
 		[](std::vector<std::any>& args) -> Conditions
 		{

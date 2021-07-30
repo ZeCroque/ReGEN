@@ -12,6 +12,8 @@ set(HEADERS
 	${HEADER_DIR}/CommandsRegistry.h
     ${HEADER_DIR}/CommandsDeclaration.h
     ${HEADER_DIR}/DataManager.h
+    ${HEADER_DIR}/Graph.h
+    ${HEADER_DIR}/ChunkMatrix.h
 )
 
 set(SOURCES
@@ -19,6 +21,7 @@ set(SOURCES
     ${SOURCE_DIR}/CommandsRegistry.cpp
     ${SOURCE_DIR}/CommandsDeclaration.cpp
     ${SOURCE_DIR}/DataManager.cpp
+    ${SOURCE_DIR}/Graph.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

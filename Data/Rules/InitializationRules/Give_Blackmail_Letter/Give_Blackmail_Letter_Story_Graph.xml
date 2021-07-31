@@ -1,0 +1,47 @@
+<graph name="GiveBlackmailLetter_Story" type="Story_Graph">
+  <nodes>
+    <node modification="GiveBlackmailLetter_Request_from_Invoker_Modification.xml" name="GiveBlackmailLetter_Request_from_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="Go_To_Recipient_Modification.xml" name="Go_To_Recipient">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Go_To</value>
+      </attr>
+    </node>
+    <node modification="Give_BlackmailLetter_Modification.xml" name="Give_BlackmailLetter">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Blackmail</value>
+      </attr>
+    </node>
+    <node modification="Return_to_Invoker_Modification.xml" name="Return_to_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Return</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="GiveBlackmailLetter_Request_from_Invoker" to="Go_To_Recipient">
+      <relation none="none"/>
+    </connection>
+    <connection from="Go_To_Recipient" to="Give_BlackmailLetter">
+      <relation none="none"/>
+    </connection>
+    <connection from="Give_BlackmailLetter" to="Return_to_Invoker">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

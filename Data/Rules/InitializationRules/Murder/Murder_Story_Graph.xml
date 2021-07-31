@@ -1,0 +1,47 @@
+<graph name="Murder_Story" type="Story_Graph">
+  <nodes>
+    <node modification="Murder_Request_from_Invoker_Modification.xml" name="Murder_Request_from_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="Go_To_Victim_Modification.xml" name="Go_To_Victim">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Go_To</value>
+      </attr>
+    </node>
+    <node modification="Kill_Victim_Modification.xml" name="Kill_Victim">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Murder</value>
+      </attr>
+    </node>
+    <node modification="Return_to_Invoker_Modification.xml" name="Return_to_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Return</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="Murder_Request_from_Invoker" to="Go_To_Victim">
+      <relation none="none"/>
+    </connection>
+    <connection from="Go_To_Victim" to="Kill_Victim">
+      <relation none="none"/>
+    </connection>
+    <connection from="Kill_Victim" to="Return_to_Invoker">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

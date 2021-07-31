@@ -1,0 +1,13 @@
+<graph name="More_Fight_Story_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="Fight_Modification.xml" name="Fight">
+      <attr name="target" type="str">
+        <value>Monster</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Fight</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections/>
+</graph>

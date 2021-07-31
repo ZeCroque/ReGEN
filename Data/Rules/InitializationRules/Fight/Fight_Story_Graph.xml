@@ -1,0 +1,47 @@
+<graph name="Fight_Story" type="Story_Graph">
+  <nodes>
+    <node modification="Receive_Request_Modification.xml" name="Receive_Request">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="Go_To_Lair_Modification.xml" name="Go_To_Lair">
+      <attr name="target" type="str">
+        <value>Monster</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Go_To</value>
+      </attr>
+    </node>
+    <node modification="Fight_Monster_Modification.xml" name="Fight_Monster">
+      <attr name="target" type="str">
+        <value>Monster</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Fight</value>
+      </attr>
+    </node>
+    <node modification="Return_To_Invoker_Modification.xml" name="Return_To_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Return</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="Receive_Request" to="Go_To_Lair">
+      <relation none="none"/>
+    </connection>
+    <connection from="Go_To_Lair" to="Fight_Monster">
+      <relation none="none"/>
+    </connection>
+    <connection from="Fight_Monster" to="Return_To_Invoker">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

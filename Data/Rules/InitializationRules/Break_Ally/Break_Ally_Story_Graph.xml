@@ -1,0 +1,47 @@
+<graph name="BreakAlly_Story" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="Break_Ally_Request_from_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="None" name="Go_To_Recipient">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Go_To</value>
+      </attr>
+    </node>
+    <node modification="Break_Allegiance_Modification.xml" name="Break_Allegiance">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Damage</value>
+      </attr>
+    </node>
+    <node modification="None" name="Return_to_Invoker">
+        <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Return</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="Break_Ally_Request_from_Invoker" to="Go_To_Recipient">
+      <relation none="none"/>
+    </connection>
+    <connection from="Go_To_Recipient" to="Break_Allegiance">
+      <relation none="none"/>
+    </connection>
+    <connection from="Break_Allegiance" to="Return_to_Invoker">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

@@ -1,0 +1,13 @@
+<graph name="Encounter_Story_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="Go_To_Modification.xml" name="Go_To">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Go_To</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections/>
+</graph>

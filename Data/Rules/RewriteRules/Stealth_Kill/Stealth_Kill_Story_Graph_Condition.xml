@@ -1,0 +1,13 @@
+<graph name="StKill_Story_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="Fight_Monster">
+      <attr name="target" type="str">
+        <value>Monster</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Fight</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections/>
+</graph>

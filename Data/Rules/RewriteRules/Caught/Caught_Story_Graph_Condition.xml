@@ -1,0 +1,13 @@
+<graph name="Steal_Story_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="Steal_Item">
+      <attr name="target" type="str">
+        <value>Object</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Steal</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections/>
+</graph>

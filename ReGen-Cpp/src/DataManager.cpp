@@ -14,45 +14,84 @@ void DataManager::init(const char* inTestLayoutName, const char* inContentPath)
 	
 	const auto worldGraphPath = contentPath + "SocialGraphs/" + testLayout.document_element().child("socialgraph").text().as_string() + FILE_EXTENSION;
 	assert(std::filesystem::exists(worldGraphPath) && std::filesystem::is_regular_file(worldGraphPath));
-	worldGraph.load_file(worldGraphPath.c_str());
+	worldGraph.loadFromXml(worldGraphPath);
 
-	initializationRules.append_child("rules");
-	loadRules(contentPath);
-	
-	rewriteRules.append_child("rules");
-	loadRules(contentPath, true);
+	const auto rulesPath = contentPath + "Rules/";
+	loadRules(rulesPath + "InitializationRules/", testLayout.document_element().child("initializationrules"), initializationRules);
+	loadRules(rulesPath + "RewriteRules/", testLayout.document_element().child("rewriterules"), rewriteRules);	
 }
 
-void DataManager::loadRules(const std::string& inContentPath, const bool inLoadRewriteRules) const
+#ifndef NDEBUG
+void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool inPrintRules)
 {
-	auto& rules = inLoadRewriteRules ? rewriteRules : initializationRules;
-	const auto rulesFolderPath = inContentPath + "Rules/" + (inLoadRewriteRules ? "RewriteRules/" : "InitializationRules/");
-	for(const auto& ruleName : testLayout.document_element().child(inLoadRewriteRules ? "rewriterules" : "initializationrules").children())
+	std::string color = "lightblue4";
+	std::string fontColor = "lightblue4";
+	std::string baseOutputPath = "./Output/SocialGraph";
+
+	if(inPrintWorldGraph)
 	{
-		const auto ruleFolderPath = rulesFolderPath + ruleName.text().as_string() + "/";
-		const auto rulePathExtensionless = ruleFolderPath + ruleName.text().as_string();
-		pugi::xml_document document;
+		worldGraph.saveAsDotFile(color, fontColor, baseOutputPath);
+	}
+
+	if(inPrintRules)
+	{
+		color = "ivory4";
+		fontColor = "ivory4";
 		
-		auto filePath = rulePathExtensionless + FILE_EXTENSION;
-		assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
-		document.load_file(filePath.c_str());
-		auto rule = rules.document_element().append_copy(document.document_element());
+		char i = '0';
+		baseOutputPath = "./Output/InitRules/";
+		for(auto& [socialConditions, storyConditions, storyGraph, nodeModificationArguments] : initializationRules)
+		{
+			auto outputPath(baseOutputPath);
+			outputPath.push_back(i);
+			storyGraph.saveAsDotFile(color, fontColor, outputPath);
+			socialConditions.saveAsDotFile(color, fontColor, outputPath);
+			storyConditions.saveAsDotFile(color, fontColor, outputPath);
+			++i;
+		}
 
-		filePath = rulePathExtensionless + "_Social_Condition" + FILE_EXTENSION; 
-		assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
-		document.load_file(filePath.c_str());
-		auto socialConditionNode = rule.child("socialcondition");
-		socialConditionNode.remove_children();
-		socialConditionNode.append_copy(document.document_element());
+		i = '0';
+		baseOutputPath = "./Output/RewriteRules/";
+		for(auto& [socialConditions, storyConditions, storyGraph, nodeModificationArguments] : rewriteRules)
+		{
+			auto outputPath(baseOutputPath);
+			outputPath.push_back(i);
+			storyGraph.saveAsDotFile(color, fontColor, outputPath);
+			socialConditions.saveAsDotFile(color, fontColor, outputPath);
+			storyConditions.saveAsDotFile(color, fontColor, outputPath);
+			++i;
+		}
+	}
+}
+#endif
 
-		filePath = rulePathExtensionless + "_Story_Modification" + FILE_EXTENSION; 
-		assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
-		document.load_file(filePath.c_str());
-		auto storyModificationNode = rule.child("storymodification");
-		storyModificationNode.remove_children();
-		auto storyModification = storyModificationNode.append_copy(document.document_element());
+void DataManager::loadRules(const std::string& inRulesPath, const pugi::xml_node& inRulesListingNode, std::list<Rule>& outRulesList) const
+{
+	for(const auto& ruleName : inRulesListingNode.children())
+	{
+		const auto ruleFolderPath = inRulesPath + ruleName.text().as_string() + "/";
+		const auto rulePathExtensionless = ruleFolderPath + ruleName.text().as_string();
 
-		for(auto& storyNode : storyModification.child("nodes").children("node"))
+		Rule rule;
+		
+		auto filePath = rulePathExtensionless + "_Social_Condition" + FILE_EXTENSION; 
+		assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
+		rule.socialConditions.loadFromXml(filePath);
+
+		filePath = rulePathExtensionless + "_Story_Graph_Condition" + FILE_EXTENSION; 
+		if(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath))
+		{
+			rule.storyConditions.loadFromXml(filePath);
+		}
+
+		filePath = rulePathExtensionless + "_Story_Graph" + FILE_EXTENSION; 
+		assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
+		pugi::xml_document document;
+		document.load_file(filePath.c_str());
+		const auto storyGraph = document.document_element();
+		rule.storyGraph.loadFromXml(storyGraph);
+
+		/*for(auto& storyNode : storyGraph.child("nodes").children("node"))
 		{
 			if(const auto modificationName = std::string(storyNode.attribute("modification").as_string()); modificationName != "None")
 			{
@@ -60,23 +99,11 @@ void DataManager::loadRules(const std::string& inContentPath, const bool inLoadR
 				filePath += modificationName;
 				assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
 				document.load_file(filePath.c_str());
-				storyNode.append_copy(document.document_element());
+				const auto modification = document.document_element();
+				//TODO load modifications
 			}
-			else
-			{
-				storyNode.append_child("Modification");
-			}
-			storyNode.remove_attribute("modification");
-		}
+		}*/
 
-		if(inLoadRewriteRules)
-		{
-			filePath = rulePathExtensionless + "_Story_Condition" + FILE_EXTENSION; 
-			assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
-			document.load_file(filePath.c_str());
-			auto storyConditionNode = rule.child("storycondition");
-			storyConditionNode.remove_children();
-			storyConditionNode.append_copy(document.document_element());
-		}
+		outRulesList.emplace_back(rule);
 	}
 }

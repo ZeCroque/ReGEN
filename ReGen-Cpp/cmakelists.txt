@@ -14,6 +14,7 @@ set(HEADERS
     ${HEADER_DIR}/DataManager.h
     ${HEADER_DIR}/Graph.h
     ${HEADER_DIR}/ChunkMatrix.h
+    ${HEADER_DIR}/Rule.h
 )
 
 set(SOURCES

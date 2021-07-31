@@ -1,0 +1,25 @@
+<graph name="More_Fight_Story_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="Fight_Modification.xml" name="Fight">
+      <attr name="target" type="str">
+        <value>Monster</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Fight</value>
+      </attr>
+    </node>
+    <node modification="Fight_2_Modification.xml" name="Fight_2">
+      <attr name="target" type="str">
+        <value>Monster</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Fight</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="Fight" to="Fight_2">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

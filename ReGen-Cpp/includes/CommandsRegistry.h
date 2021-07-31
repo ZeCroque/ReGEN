@@ -8,6 +8,7 @@
 #include "Singleton.h"
 
 using Condition = int; //TODO do proper Condition struct
+using CommandArguments = std::any;  //TODO do proper CommandArguments struct
 
 struct Conditions
 {

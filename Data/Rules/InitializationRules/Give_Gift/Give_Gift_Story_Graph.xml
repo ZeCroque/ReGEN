@@ -1,0 +1,47 @@
+<graph name="GiveGift_Story" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="GiveGift_Request_from_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="None" name="Go_To_Recipient">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Go_To</value>
+      </attr>
+    </node>
+    <node modification="Give_Gift_Modification.xml" name="Give_Gift">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Give_Item</value>
+      </attr>
+    </node>
+    <node modification="None" name="Return_to_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Return</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="GiveGift_Request_from_Invoker" to="Go_To_Recipient">
+      <relation none="none"/>
+    </connection>
+    <connection from="Go_To_Recipient" to="Give_Gift">
+      <relation none="none"/>
+    </connection>
+    <connection from="Give_Gift" to="Return_to_Invoker">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

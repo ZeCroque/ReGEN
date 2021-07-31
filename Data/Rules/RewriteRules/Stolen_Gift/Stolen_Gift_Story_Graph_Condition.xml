@@ -1,0 +1,13 @@
+<graph name="Stolen_Gift_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="Give_Gift">
+      <attr name="target" type="str">
+        <value>Recipient</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Give_Item</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections/>
+</graph>

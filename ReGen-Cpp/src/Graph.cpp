@@ -16,13 +16,29 @@ Edge::Edge() : index(NONE)
 {
 }
 
-Graph::Graph(std::string inName) : name(std::move(inName)), nodeCount(0), edgeCount(0)
+Graph::Graph() : name("none"), type("default"), nodeCount(0), edgeCount(0)
 {
 }
 
-Graph::Graph(const pugi::xml_node& parsedXml) : Graph(parsedXml.attribute("name").as_string())
+Graph::Graph(std::string inName, std::string inType) : name(std::move(inName)), type(std::move(inType)), nodeCount(0), edgeCount(0)
 {
-	for(const auto& node : parsedXml.child("nodes").children())
+}
+
+void Graph::loadFromXml(const std::string& inPath)
+{
+	pugi::xml_document document;
+	document.load_file(inPath.c_str());
+	const auto& parsedXml = document.document_element();
+
+	loadFromXml(parsedXml);
+}
+
+void Graph::loadFromXml(const pugi::xml_node& inParsedXml)
+{
+	name = inParsedXml.attribute("name").as_string();
+	type = inParsedXml.attribute("type").as_string();
+	
+	for(const auto& node : inParsedXml.child("nodes").children())
 	{
 		std::unordered_map<std::string, NodeAttribute> nodeAttributes;
 		for(const auto& nodeAttribute : node.children("attr"))
@@ -45,7 +61,7 @@ Graph::Graph(const pugi::xml_node& parsedXml) : Graph(parsedXml.attribute("name"
 			)
 		);
 	}
-	for(const auto& connection : parsedXml.child("connections").children())
+	for(const auto& connection : inParsedXml.child("connections").children())
 	{
 		std::unordered_map<std::string, std::string> edgeAttributes;
 
@@ -89,13 +105,11 @@ void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, const s
 	edge.targetNodeName = inTargetNodeName;
 }
 
-//TODO colors
-//TODO support story graphs
-void Graph::saveAsDotFile(const std::string& inOutputPath, const bool inLogAdjacencyMatrix) const
+void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontColor, const std::string& inOutputPath, const bool inLogAdjacencyMatrix) const
 {
 	if(!std::filesystem::exists(inOutputPath))
 	{
-		std::filesystem::create_directory(inOutputPath);
+		std::filesystem::create_directories(inOutputPath);
 	}
 	assert(!std::filesystem::is_regular_file(inOutputPath));
 	
@@ -112,7 +126,7 @@ void Graph::saveAsDotFile(const std::string& inOutputPath, const bool inLogAdjac
 			{
 				file << name << "=" << nodeAttribute.value << "\\l";  
 			}
-			file << "}\"] [color = ivory4 fontcolor=ivory4]" << std::endl;
+			file << "}\"] [color=" << inColor << " fontcolor=" << inFontColor << "]" << std::endl;
 			
 		}
 		
@@ -130,7 +144,12 @@ void Graph::saveAsDotFile(const std::string& inOutputPath, const bool inLogAdjac
 				{
 					for(const auto& [attribute, value] : edge.attributes)
 					{
-						file << edge.sourceNodeName << " -> " << edge.targetNodeName <<  " [label=" << "\"{'" << attribute << "' : '" << value << "'}\"] [Color = ivory4 fontcolor=ivory4]" << std::endl;
+						file << edge.sourceNodeName << " -> " << edge.targetNodeName;
+						if (attribute != "none")
+						{
+							file << " [label=" << "\"{'" << attribute << "' : '" << value << "'}\"] [color=" << inColor << " fontcolor=" << inFontColor << "]"; 
+						}
+						file << std::endl;
 					}
 				}
 			}

@@ -1,0 +1,47 @@
+<graph name="Steal_Story" type="Story_Graph">
+  <nodes>
+    <node modification="Stealing_Request_Modification.xml" name="Stealing_Request">
+      <attr name="target" type="str">
+        <value>Thief</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="Go_To_Owner_Modification.xml" name="Go_To_Owner">
+      <attr name="target" type="str">
+        <value>Owner</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Go_To</value>
+      </attr>
+    </node>
+    <node modification="Steal_Item_Modification.xml" name="Steal_Item">
+      <attr name="target" type="str">
+        <value>Object</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Steal</value>
+      </attr>
+    </node>
+    <node modification="Return_Item_Modification.xml" name="Return_Item">
+      <attr name="target" type="str">
+        <value>Thief</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Return</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="Stealing_Request" to="Go_To_Owner">
+      <relation none="none"/>
+    </connection>
+    <connection from="Go_To_Owner" to="Steal_Item">
+      <relation none="none"/>
+    </connection>
+    <connection from="Steal_Item" to="Return_Item">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

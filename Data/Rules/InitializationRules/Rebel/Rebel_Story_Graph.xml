@@ -1,0 +1,58 @@
+<graph name="Murder_Story" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="Meet_Leader">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="None" name="Plot_to_Destroy">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="Attack_Victim_Modification.xml" name="Attack_Victim">
+      <attr name="target" type="str">
+        <value>Victim</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Battle</value>
+      </attr>
+    </node>
+    <node modification="None" name="Kill_Victim">
+      <attr name="target" type="str">
+        <value>Victim</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Murder</value>
+      </attr>
+    </node>
+    <node modification="None" name="Return_to_Invoker">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Return</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="Meet_Leader" to="Plot_to_Destroy">
+      <relation none="none"/>
+    </connection>
+    <connection from="Plot_to_Destroy" to="Attack_Victim">
+      <relation none="none"/>
+    </connection>
+    <connection from="Attack_Victim" to="Kill_Victim">
+      <relation none="none"/>
+    </connection>
+    <connection from="Kill_Victim" to="Return_to_Invoker">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

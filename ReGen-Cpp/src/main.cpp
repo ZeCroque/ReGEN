@@ -6,7 +6,8 @@
 int main()
 {
 	DataManager::getInstance()->init("one_story");
-	DataManager::getInstance()->saveDataAsDotFormat(true, true);
+	//DataManager::getInstance()->saveDataAsDotFormat(true, true);
+	DataManager::getInstance()->printTestLayout();
 	
 	declareCommands();
 

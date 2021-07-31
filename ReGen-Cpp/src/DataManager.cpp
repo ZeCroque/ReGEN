@@ -1,6 +1,7 @@
 #include "DataManager.h"
 
 #include <filesystem>
+#include <pugixml.hpp>
 
 constexpr auto FILE_EXTENSION = ".xml";
 
@@ -10,19 +11,60 @@ void DataManager::init(const char* inTestLayoutName, const char* inContentPath)
 	const auto testLayoutPath = contentPath + "TestLayout/" + inTestLayoutName + FILE_EXTENSION;
 	assert(std::filesystem::exists(testLayoutPath) && std::filesystem::is_regular_file(testLayoutPath));
 	pugi::xml_document testLayoutDocument;
-	testLayout.load_file(testLayoutPath.c_str());
+	testLayoutDocument.load_file(testLayoutPath.c_str());
+	const auto testLayoutNode = testLayoutDocument.document_element();
+	testLayout.numStoryToGenerate = testLayoutNode.child("numstoriestogenerate").text().as_int();
+	testLayout.maxNumberOfRewrites = testLayoutNode.child("maxnumberofrewrites").text().as_int();
+
+	for(const auto& metricToOptimize : testLayoutNode.child("metricstooptimize").children("metric"))
+	{
+		testLayout.metricsToOptimize.emplace_back(std::pair{
+			metricToOptimize.attribute("name").as_string(),
+			metricToOptimize.attribute("weight").as_int()
+		});
+	}
+
+	for(const auto& metricToAnalyze : testLayoutNode.child("metricstoanalyze").children("metric"))
+	{
+		testLayout.metricsToAnalyze.emplace_back(metricToAnalyze.attribute("name").as_string());
+	}
 	
-	const auto worldGraphPath = contentPath + "SocialGraphs/" + testLayout.document_element().child("socialgraph").text().as_string() + FILE_EXTENSION;
+	const auto worldGraphPath = contentPath + "SocialGraphs/" + testLayoutNode.child("socialgraph").text().as_string() + FILE_EXTENSION;
 	assert(std::filesystem::exists(worldGraphPath) && std::filesystem::is_regular_file(worldGraphPath));
 	worldGraph.loadFromXml(worldGraphPath);
 
 	const auto rulesPath = contentPath + "Rules/";
-	loadRules(rulesPath + "InitializationRules/", testLayout.document_element().child("initializationrules"), initializationRules);
-	loadRules(rulesPath + "RewriteRules/", testLayout.document_element().child("rewriterules"), rewriteRules);	
+	loadRules(rulesPath + "InitializationRules/", testLayoutNode.child("initializationrules"), initializationRules);
+	loadRules(rulesPath + "RewriteRules/", testLayoutNode.child("rewriterules"), rewriteRules);	
 }
 
 #ifndef NDEBUG
-void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool inPrintRules)
+void DataManager::printTestLayout() const
+{
+	PRINTLN("NUM STORY TO GENERATE : " + std::to_string(testLayout.numStoryToGenerate));
+	PRINTLN("MAX NUMBER OF REWRITE :" + std::to_string(testLayout.maxNumberOfRewrites));
+	PRINTLN("");
+	
+	PRINT_SEPARATOR();
+	PRINTLN("METRICS TO OPTIMIZE");
+	PRINT_SEPARATOR();
+	for(const auto& [name, weight] : testLayout.metricsToOptimize)
+	{
+		PRINTLN(name + " : " + std::to_string(weight));
+	}
+	PRINTLN("");
+	
+	PRINT_SEPARATOR();
+	PRINTLN("METRICS TO ANALYZE");
+	PRINT_SEPARATOR();
+	for(const auto& name : testLayout.metricsToAnalyze)
+	{
+		PRINTLN(name);
+	}
+	PRINTLN("");
+}
+
+void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool inPrintRules) const
 {
 	std::string color = "lightblue4";
 	std::string fontColor = "lightblue4";
@@ -40,7 +82,7 @@ void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool i
 		
 		char i = '0';
 		baseOutputPath = "./Output/InitRules/";
-		for(auto& [socialConditions, storyConditions, storyGraph, nodeModificationArguments] : initializationRules)
+		for(const auto& [socialConditions, storyConditions, storyGraph, nodeModificationArguments] : initializationRules)
 		{
 			auto outputPath(baseOutputPath);
 			outputPath.push_back(i);
@@ -52,7 +94,7 @@ void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool i
 
 		i = '0';
 		baseOutputPath = "./Output/RewriteRules/";
-		for(auto& [socialConditions, storyConditions, storyGraph, nodeModificationArguments] : rewriteRules)
+		for(const auto& [socialConditions, storyConditions, storyGraph, nodeModificationArguments] : rewriteRules)
 		{
 			auto outputPath(baseOutputPath);
 			outputPath.push_back(i);

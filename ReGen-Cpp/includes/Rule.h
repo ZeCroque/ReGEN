@@ -1,7 +1,7 @@
 #ifndef RULE_H
 #define RULE_H
 
-#include "CommandsRegistry.h"
+#include "Command.h"
 #include "Graph.h"
 
 struct Rule

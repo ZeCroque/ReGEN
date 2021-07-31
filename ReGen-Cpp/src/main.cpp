@@ -11,10 +11,9 @@ int main()
 	
 	declareCommands();
 
-	const std::hash<std::string> hasher;
 	std::vector<std::any> arg;
 	arg.emplace_back(std::string("toto"));
-	CommandRegistry::getInstance()->executeCommand(hasher("removeVictimRelations"), arg);
+	CommandRegistry::getInstance()->executeCommand("removeVictimRelations", arg);
 	
 	return 0;
 }

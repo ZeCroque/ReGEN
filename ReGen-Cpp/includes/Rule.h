@@ -9,7 +9,7 @@ struct Rule
 	Graph socialConditions;
 	Graph storyConditions;
 	Graph storyGraph;
-	std::unordered_map<std::string, std::vector<CommandArguments> > nodeModificationArguments;
+	std::unordered_map<std::string, std::list<CommandData> > nodeModificationArguments;
 };
 
 #endif // RULE_H

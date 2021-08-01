@@ -44,17 +44,21 @@ void Graph::loadFromXml(const pugi::xml_node& inParsedXml)
 		for(const auto& nodeAttribute : node.children("attr"))
 		{
 			const auto attributeName = std::string();
-			nodeAttributes.insert({
+			nodeAttributes.insert
+			({
 				nodeAttribute.attribute("name").as_string(),
-				NodeAttribute{
+				NodeAttribute
+				{
 					nodeAttribute.attribute("type").as_string(),
 					nodeAttribute.first_child().text().as_string()
 				}
 			});
 		}
 		
-		addNode(
-			Node(
+		addNode
+		(
+			Node
+			(
 				node.attribute("name").as_string(),
 				std::string(),
 				nodeAttributes
@@ -67,7 +71,8 @@ void Graph::loadFromXml(const pugi::xml_node& inParsedXml)
 
 		for(const auto& attribute : connection.children("relation"))
 		{
-			addEdge(
+			addEdge
+			(
 				{
 					attribute.first_attribute().name(),
 					attribute.first_attribute().as_string()

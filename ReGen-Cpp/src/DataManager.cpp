@@ -18,10 +18,14 @@ void DataManager::init(const char* inTestLayoutName, const char* inContentPath)
 
 	for(const auto& metricToOptimize : testLayoutNode.child("metricstooptimize").children("metric"))
 	{
-		testLayout.metricsToOptimize.emplace_back(std::pair{
-			metricToOptimize.attribute("name").as_string(),
-			metricToOptimize.attribute("weight").as_int()
-		});
+		testLayout.metricsToOptimize.emplace_back
+		(
+			std::pair
+			{
+				metricToOptimize.attribute("name").as_string(),
+				metricToOptimize.attribute("weight").as_int()
+			}
+		);
 	}
 
 	for(const auto& metricToAnalyze : testLayoutNode.child("metricstoanalyze").children("metric"))
@@ -105,6 +109,36 @@ void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool i
 		}
 	}
 }
+
+void DataManager::readArguments(const pugi::xml_node inParsedArguments, std::vector<std::any>& outArguments)
+{
+	outArguments.reserve(std::distance(inParsedArguments.children().begin(), inParsedArguments.children().end()));
+	
+	for(const auto& parsedArgument : inParsedArguments.children())
+	{
+		if(const auto tagName = std::string(parsedArgument.name()); tagName == "array")
+		{
+			std::vector<std::any> argumentArray;
+			readArguments(parsedArgument, argumentArray);
+			outArguments.emplace_back(argumentArray);
+		}
+		else if(tagName == "dict")
+		{
+			std::vector<std::any> keys;
+			const auto& parsedKeys = parsedArgument.children("dict_element");
+			keys.reserve(std::distance(parsedKeys.begin(), parsedKeys.end()));
+			for(const auto& parsedKey : parsedKeys)
+			{
+				keys.emplace_back(parsedKey.attribute("value").as_string());
+			}
+			outArguments.emplace_back(keys);
+		}
+		else
+		{
+			outArguments.emplace_back(parsedArgument.attribute("value").as_string());
+		}
+	}
+}
 #endif
 
 void DataManager::loadRules(const std::string& inRulesPath, const pugi::xml_node& inRulesListingNode, std::list<Rule>& outRulesList) const
@@ -133,18 +167,53 @@ void DataManager::loadRules(const std::string& inRulesPath, const pugi::xml_node
 		const auto storyGraph = document.document_element();
 		rule.storyGraph.loadFromXml(storyGraph);
 
-		/*for(auto& storyNode : storyGraph.child("nodes").children("node"))
+		for(auto& storyNode : storyGraph.child("nodes").children("node"))
 		{
 			if(const auto modificationName = std::string(storyNode.attribute("modification").as_string()); modificationName != "None")
 			{
-				filePath = ruleFolderPath + "/Modifications/";
+				pugi::xml_document modificationDocument;
+				filePath = ruleFolderPath + "Modifications/";
 				filePath += modificationName;
 				assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
-				document.load_file(filePath.c_str());
-				const auto modification = document.document_element();
-				//TODO load modifications
+				modificationDocument.load_file(filePath.c_str());
+				const auto modificationNode = modificationDocument.document_element();
+
+				std::list<CommandData> commandsData;
+			
+				for(const auto& command : modificationNode.children("Method"))
+				{
+					CommandData commandData;
+					commandData.name = command.attribute("name").as_string();
+
+					std::vector<std::any> arguments;
+					const auto parsedArguments = command.child("args");
+					readArguments(parsedArguments, arguments);
+					commandData.arguments = arguments;
+
+					commandsData.emplace_back(commandData);
+				}
+
+				for(const auto& command : modificationNode.children("Attribute"))
+				{
+					std::vector<std::any> arguments;
+					arguments.reserve(2);
+					arguments.emplace_back(command.attribute("key").as_string());
+					arguments.emplace_back(command.attribute("value").as_string());
+					
+					commandsData.emplace_back
+					(
+						CommandData
+						{
+							"modify_attribute",
+							command.attribute("name").as_string(),
+							arguments
+						}
+					);
+				}
+
+				rule.nodeModificationArguments.insert({storyNode.attribute("name").as_string(), commandsData});
 			}
-		}*/
+		}
 
 		outRulesList.emplace_back(rule);
 	}

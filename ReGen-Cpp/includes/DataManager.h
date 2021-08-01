@@ -18,6 +18,7 @@ public:
 #endif
 
 private:
+	static void readArguments(pugi::xml_node inParsedArguments, std::vector<std::any>& outArguments);
 	void loadRules(const std::string& inRulesPath, const pugi::xml_node& inRulesListingNode, std::list<Rule>& outRulesList) const;
 	
 	TestLayout testLayout;	

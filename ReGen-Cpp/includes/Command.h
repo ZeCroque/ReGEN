@@ -6,7 +6,13 @@
 #include <list>
 
 using Condition = int; //TODO do proper Condition struct
-using CommandArguments = std::any;  //TODO do proper CommandArguments struct
+
+struct CommandData
+{
+	std::string name;
+	std::string caller;
+	std::vector<std::any> arguments;
+};
 
 struct Conditions
 {

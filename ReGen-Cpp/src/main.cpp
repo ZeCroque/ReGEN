@@ -11,9 +11,9 @@ int main()
 	
 	declareCommands();
 
-	std::vector<std::any> arg;
-	arg.emplace_back(std::string("toto"));
-	CommandRegistry::getInstance()->executeCommand("removeVictimRelations", arg);
+	CommandData cmd;
+	cmd.arguments.emplace_back(std::string("toto"));
+	CommandRegistry::getInstance()->executeCommand("removeVictimRelations", cmd);
 	
 	return 0;
 }

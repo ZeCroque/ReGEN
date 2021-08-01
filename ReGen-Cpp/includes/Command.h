@@ -22,8 +22,8 @@ struct Conditions
 
 struct Command
 {
-	std::function<void(std::vector<std::any>&)> implementation;
-	std::function<Conditions(std::vector<std::any>&)> conditionConstructor;
+	std::function<void(CommandData&)> implementation;
+	std::function<Conditions(CommandData&)> conditionConstructor;
 };
 
 #endif // COMMAND_H

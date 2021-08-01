@@ -13,14 +13,14 @@ void declareCommands()
 	 ******************************************************************************/	
 	commandRegistry->registerCommand("removeVictimRelations", new Command
 	                                 {
-		                                 [](std::vector<std::any>& args)
+		                                 [](CommandData& inCommandData)
 		                                 {
-			                                 assert(args.size() == 1);
-			                                 PRINTLN(std::any_cast<std::string>(args[0]));
+			                                 assert(inCommandData.arguments.size() == 1);
+			                                 PRINTLN(std::any_cast<std::string>(inCommandData.arguments[0]));
 		                                 },
-		                                 [](std::vector<std::any>& args) -> Conditions
+		                                 [](CommandData& inCommandData) -> Conditions
 		                                 {
-			                                 assert(args.size() == 1);
+			                                 assert(inCommandData.arguments.size() == 1);
 			                                 return
 			                                 {
 				                                 std::list<Condition>{},
@@ -35,15 +35,15 @@ void declareCommands()
 	 *
 	 * @param ref murderer
 	 ******************************************************************************/	
-	commandRegistry->registerCommand("updateVictimsFriendRelationsTowardMurderer", new Command
+	commandRegistry->registerCommand("murder", new Command
 	                                 {
-		                                 [](std::vector<std::any>& args)
+		                                 [](CommandData& inCommandData)
 		                                 {
-			                                 assert(args.size() == 1);
+			                                 assert(inCommandData.arguments.size() == 1);
 		                                 },
-		                                 [](std::vector<std::any>& args) -> Conditions
+		                                 [](CommandData& inCommandData) -> Conditions
 		                                 {
-			                                 assert(args.size() == 1);
+			                                 assert(inCommandData.arguments.size() == 1);
 			                                 return
 			                                 {
 				                                 std::list<Condition>{},

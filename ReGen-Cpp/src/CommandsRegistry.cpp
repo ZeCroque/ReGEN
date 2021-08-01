@@ -10,14 +10,14 @@ void CommandRegistry::registerCommand(const std::string& inKey, Command* inObjec
 	assert(false);	
 }
 
-void CommandRegistry::executeCommand(const std::string& inKey, CommandData& inCommandData) const
+void CommandRegistry::executeCommand(const CommandData& inCommandData) const
 {
-	find(inKey)->implementation(inCommandData);
+	find(inCommandData.name)->implementation(inCommandData);
 }
 
-Conditions CommandRegistry::getCommandConditions(const std::string& inKey, CommandData& inCommandData) const
+Conditions CommandRegistry::getCommandConditions(const CommandData& inCommandData) const
 {
-	return find(inKey)->conditionConstructor(inCommandData);
+	return find(inCommandData.name)->conditionConstructor(inCommandData);
 }
 
 Command* CommandRegistry::find(const std::string& inKey) const

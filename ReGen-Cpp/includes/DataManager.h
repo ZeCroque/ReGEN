@@ -14,6 +14,7 @@ public:
 	void init(const char* inTestLayoutName, const char* inContentPath = "./Data/");
 #ifndef NDEBUG
 	void printTestLayout() const;
+	void printStoryModifications();
 	void saveDataAsDotFormat(bool inPrintWorldGraph = true, bool inPrintRules = false) const;
 #endif
 

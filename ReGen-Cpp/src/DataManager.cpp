@@ -3,6 +3,10 @@
 #include <filesystem>
 #include <pugixml.hpp>
 
+#ifndef NDEBUG
+#include "CommandsRegistry.h"
+#endif
+
 constexpr auto FILE_EXTENSION = ".xml";
 
 void DataManager::init(const char* inTestLayoutName, const char* inContentPath)
@@ -68,6 +72,33 @@ void DataManager::printTestLayout() const
 	PRINTLN("");
 }
 
+void DataManager::printStoryModifications()
+{
+	for(const auto& rule : initializationRules)
+	{
+		PRINT_SEPARATOR();
+		PRINT_SEPARATOR();
+		PRINTLN("RULE NAME : " + rule.name);
+		PRINT_SEPARATOR();
+		PRINT_SEPARATOR();
+		PRINTLN("");
+		for(const auto& [modificationName, commandsData] : rule.nodeModificationArguments)
+		{
+			PRINT_SEPARATOR();
+			PRINTLN("MODIFICATION NAME :" + modificationName);
+			PRINT_SEPARATOR();
+			for(const auto& commandData : commandsData)
+			{
+				CommandRegistry::getInstance()->executeCommand(commandData);
+				PRINT_SEPARATOR();
+			}
+			PRINTLN("");
+		}
+		PRINTLN("");
+		PRINTLN("");
+	}
+}
+
 void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool inPrintRules) const
 {
 	std::string color = "lightblue4";
@@ -86,7 +117,7 @@ void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool i
 		
 		char i = '0';
 		baseOutputPath = "./Output/InitRules/";
-		for(const auto& [socialConditions, storyConditions, storyGraph, nodeModificationArguments] : initializationRules)
+		for(const auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] : initializationRules)
 		{
 			auto outputPath(baseOutputPath);
 			outputPath.push_back(i);
@@ -98,7 +129,7 @@ void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool i
 
 		i = '0';
 		baseOutputPath = "./Output/RewriteRules/";
-		for(const auto& [socialConditions, storyConditions, storyGraph, nodeModificationArguments] : rewriteRules)
+		for(const auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] : rewriteRules)
 		{
 			auto outputPath(baseOutputPath);
 			outputPath.push_back(i);
@@ -124,18 +155,11 @@ void DataManager::readArguments(const pugi::xml_node inParsedArguments, std::vec
 		}
 		else if(tagName == "dict")
 		{
-			std::vector<std::any> keys;
-			const auto& parsedKeys = parsedArgument.children("dict_element");
-			keys.reserve(std::distance(parsedKeys.begin(), parsedKeys.end()));
-			for(const auto& parsedKey : parsedKeys)
-			{
-				keys.emplace_back(parsedKey.attribute("value").as_string());
-			}
-			outArguments.emplace_back(keys);
+			outArguments.emplace_back(std::string(parsedArgument.child("dict_element").attribute("value").as_string()));
 		}
 		else
 		{
-			outArguments.emplace_back(parsedArgument.attribute("value").as_string());
+			outArguments.emplace_back(std::string(parsedArgument.attribute("value").as_string()));
 		}
 	}
 }
@@ -145,11 +169,12 @@ void DataManager::loadRules(const std::string& inRulesPath, const pugi::xml_node
 {
 	for(const auto& ruleName : inRulesListingNode.children())
 	{
-		const auto ruleFolderPath = inRulesPath + ruleName.text().as_string() + "/";
-		const auto rulePathExtensionless = ruleFolderPath + ruleName.text().as_string();
-
 		Rule rule;
-		
+
+		rule.name = ruleName.text().as_string();
+
+		const auto ruleFolderPath = inRulesPath + rule.name + "/";
+		const auto rulePathExtensionless = ruleFolderPath + ruleName.text().as_string();
 		auto filePath = rulePathExtensionless + "_Social_Condition" + FILE_EXTENSION; 
 		assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
 		rule.socialConditions.loadFromXml(filePath);
@@ -185,6 +210,8 @@ void DataManager::loadRules(const std::string& inRulesPath, const pugi::xml_node
 					CommandData commandData;
 					commandData.name = command.attribute("name").as_string();
 
+					commandData.caller = command.attribute("self").as_string();
+					
 					std::vector<std::any> arguments;
 					const auto parsedArguments = command.child("args");
 					readArguments(parsedArguments, arguments);
@@ -197,8 +224,8 @@ void DataManager::loadRules(const std::string& inRulesPath, const pugi::xml_node
 				{
 					std::vector<std::any> arguments;
 					arguments.reserve(2);
-					arguments.emplace_back(command.attribute("key").as_string());
-					arguments.emplace_back(command.attribute("value").as_string());
+					arguments.emplace_back(std::string(command.attribute("key").as_string()));
+					arguments.emplace_back(std::string(command.attribute("value").as_string()));
 					
 					commandsData.emplace_back
 					(

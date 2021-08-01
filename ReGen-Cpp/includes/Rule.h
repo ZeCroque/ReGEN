@@ -6,6 +6,7 @@
 
 struct Rule
 {
+	std::string name;
 	Graph socialConditions;
 	Graph storyConditions;
 	Graph storyGraph;

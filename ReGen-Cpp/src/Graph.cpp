@@ -4,6 +4,10 @@
 #include <fstream>
 #include <pugixml.hpp>
 
+#include "Matrix.h"
+#include "Utils.h"
+
+
 Node::Node() : index(NONE)
 {
 }
@@ -12,8 +16,78 @@ Node::Node(std::string inName, std::string inModificationName, std::unordered_ma
 {
 }
 
-Edge::Edge() : index(NONE)
+bool Node::isSubNode(const Node& inParentNode)
 {
+	return containsAttributes(inParentNode) && containsEdges(incomingEdges, inParentNode.incomingEdges) && containsEdges(outgoingEdges, inParentNode.outgoingEdges);
+}
+
+bool Node::containsAttributes(const Node& inParentNode)
+{
+	for(const auto& [parentAttributeName, parentAttributeData] : inParentNode.attributes)
+	{
+		bool containsAttribute = false;
+		for(const auto& [attributeName, attributeData] : attributes)
+		{
+			if((parentAttributeName == "N/A" || parentAttributeName == attributeName) && (parentAttributeData.value == "N/A" || parentAttributeData.value == attributeData.value))
+			{
+				containsAttribute = true;
+				break;
+			}
+		}
+		if(!containsAttribute)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+bool Node::containsEdges(const std::list<std::shared_ptr<Edge>>& inNodeEdges, const std::list<std::shared_ptr<Edge>>& inParentNodeEdges)
+{
+	std::list<std::shared_ptr<Edge> > foundEdges;
+	for(const auto& parentNodeEdge : inParentNodeEdges) //For each edges from parent node
+	{
+		bool containsEdges = false;
+		for(const auto& edge : inNodeEdges) //We compare it to all edges from main node
+		{
+			if //If the edge we are looking at hasn't yet been set as a sub-edge in previous iteration
+			(
+				std::none_of(foundEdges.begin(), foundEdges.end(), [edge](const std::shared_ptr<Edge>& e)
+				{
+					return e.get() == edge.get();
+				})
+			)
+			{
+				for(const auto& [parentNodeEdgeAttributeName, parentNodeEdgeAttributeValue] : parentNodeEdge->attributes) //Then we iterate through each attributes of the parentEdge
+				{
+					bool containsEdgeAttribute = false;
+					for(const auto& [edgeAttributeName, edgeAttributeValue] : edge->attributes) //And compare it to all attributes of the currently processed main edge
+					{
+						if(parentNodeEdgeAttributeName == edgeAttributeName && (parentNodeEdgeAttributeValue == "N/A" || parentNodeEdgeAttributeValue == edgeAttributeValue)) //If it matches, we add it to our foundSubEdges list and stop checking the attributes of this edge
+						{
+							containsEdgeAttribute = true;
+							foundEdges.emplace_back(edge);
+							break;
+						}
+					}
+					if(containsEdgeAttribute) //If we found an edge with the required attributes then we stop searching for sub-edges of the currently checked parentEdge
+					{
+						containsEdges = true;
+						break;
+					}
+				}
+				if(containsEdges) //Forwarding previous statement
+				{
+					break;
+				}
+			}
+		}
+		if(!containsEdges) //If our comparison ended without entering all conditions each time, then the edges of the main node are not sub-edges of the parentNode
+		{
+			return false;
+		}
+	}
+	return true; //Else they are
 }
 
 Graph::Graph() : name("none"), type("default"), nodeCount(0), edgeCount(0)
@@ -57,7 +131,7 @@ void Graph::loadFromXml(const pugi::xml_node& inParsedXml)
 		
 		addNode
 		(
-			Node
+			new Node
 			(
 				node.attribute("name").as_string(),
 				std::string(),
@@ -85,29 +159,39 @@ void Graph::loadFromXml(const pugi::xml_node& inParsedXml)
 	}
 }
 
-void Graph::addNode(Node inNode)
+void Graph::addNode(Node* inNode)
 {
-	inNode.index = nodeCount;
+	inNode->index = nodeCount;
+	
+	const std::shared_ptr<Node> newNode(inNode);
+	nodesByName.insert({inNode->name, newNode});
+	nodesByIndex.insert({nodeCount, newNode});
+
 	++nodeCount;
-	nodes.insert({inNode.name, std::move(inNode)});
 }
 
 void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName)
 {
 	assert(inSourceNodeName != inTargetNodeName);
 
-	const auto sourceNodeIndex = nodes.at(inSourceNodeName).index;
-	const auto targetNodeIndex = nodes.at(inTargetNodeName).index;
-	auto& edge = adjacencyList.getValueAt(sourceNodeIndex, targetNodeIndex);
-	if(edge.index == NONE)
-	{		
-		edge.index = edgeCount;
+	auto sourceNode = nodesByName.at(inSourceNodeName);
+	auto targetNode = nodesByName.at(inTargetNodeName);
+	
+	const auto sourceNodeIndex = sourceNode->index;
+	const auto targetNodeIndex = targetNode->index;
+	auto edge = adjacencyList.getValueAt(sourceNodeIndex, targetNodeIndex);
+	if(!edge)
+	{	
+		edge.reset(new Edge());
+		adjacencyList.setValueAt(edge, sourceNodeIndex, targetNodeIndex);
+		edge->sourceNode = sourceNode;
+		edge->targetNode = targetNode;	
+		sourceNode->outgoingEdges.emplace_back(edge);
+		targetNode->incomingEdges.emplace_back(edge);
 		++edgeCount;
 	}
+	edge->attributes.insert(std::move(inEdgeAttribute));
 
-	edge.attributes.insert(std::move(inEdgeAttribute));
-	edge.sourceNodeName = inSourceNodeName;
-	edge.targetNodeName = inTargetNodeName;
 }
 
 void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontColor, const std::string& inOutputPath, const bool inLogAdjacencyMatrix) const
@@ -124,10 +208,10 @@ void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontC
 	{
 		file << "digraph " << name << " {" << std::endl << "node [shape = \"record\"]" << std::endl;
 
-		for(const auto& [name, node] : nodes)
+		for(const auto& [name, node] : nodesByName)
 		{
 			file << name <<  "[label=\"{" << name << "|";
-			for(const auto& [name, nodeAttribute] : node.attributes)
+			for(const auto& [name, nodeAttribute] : node->attributes)
 			{
 				file << name << "=" << nodeAttribute.value << "\\l";  
 			}
@@ -140,16 +224,15 @@ void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontC
 			for(auto i = 0; i < nodeCount; ++i)
 			{
 				const auto edge = adjacencyList.getValueAt(i, j);
-				const auto edgeExists = edge.index != NONE;
 				if(inLogAdjacencyMatrix)
 				{
-					PRINT(edgeExists);
+					PRINT(edge);
 				}
-				if(edgeExists)
+				if(edge)
 				{
-					for(const auto& [attribute, value] : edge.attributes)
+					for(const auto& [attribute, value] : edge->attributes)
 					{
-						file << edge.sourceNodeName << " -> " << edge.targetNodeName;
+						file << edge->sourceNode->name << " -> " << edge->targetNode->name;
 						if (attribute != "none")
 						{
 							file << " [label=" << "\"{'" << attribute << "' : '" << value << "'}\"] [color=" << inColor << " fontcolor=" << inFontColor << "]"; 
@@ -169,4 +252,94 @@ void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontC
 		return;
 	}
 	assert(false);
+}
+
+
+void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<Graph>& outFoundSubGraphs)
+{
+	auto s_graph_nodes = inSearchedGraph.nodesByName; 
+	
+	const int p_a = inSearchedGraph.nodeCount;
+	const int p_b = nodeCount;
+
+	int** m = new int*[p_a];
+	for(auto i = 0; i < p_a; ++i)
+	{
+		m[i] = new int[p_b];
+		for(int j = 0; j < p_b; ++j)
+		{
+			m[i][j] = 0;
+		}
+	}
+	
+	for(int row = 0; row < p_a; ++row)
+	{
+		for(int col = 0; col < p_b; ++col)
+		{
+			if(const auto node = nodesByIndex.at(col), subNode = inSearchedGraph.nodesByIndex.at(row); node->incomingEdges.size() >= subNode->incomingEdges.size()
+				&& node->outgoingEdges.size() >= subNode->outgoingEdges.size()
+				&& node->isSubNode(*subNode))
+			{
+				m[row][col] = 1;
+			}		
+		}
+	}
+
+	std::vector<std::vector<int> > subNodesIndexes;
+	subNodesIndexes.resize(p_a);
+	for(int row = 0; row < p_a; ++row)
+	{
+		subNodesIndexes[row].reserve(p_b);
+		for(int col = 0; col < p_b; ++col)
+		{
+			if(m[row][col])
+			{
+				subNodesIndexes[row].emplace_back(col);
+			}
+		}
+	}
+	
+	auto nodesCombinations = Math::customCartesianProduct(subNodesIndexes[0], subNodesIndexes[1]);
+	for(auto i = 2; i < p_a; ++i)
+	{
+		nodesCombinations = Math::customCartesianProduct(subNodesIndexes[i], nodesCombinations);
+	}
+
+	std::vector<Matrix<int> > ullmanArrays;
+	ullmanArrays.resize(nodesCombinations.size());
+
+	auto currentArrayIndex = 0;
+	for (auto& nodesCombination : nodesCombinations)
+	{
+		ullmanArrays[currentArrayIndex] = Matrix<int>(p_a, p_b);
+		for(size_t row = 0; row < nodesCombination.size(); ++row)
+		{
+			ullmanArrays[currentArrayIndex][row][nodesCombination[row]] = 1;
+		}
+		++currentArrayIndex;
+	}
+
+	for(const auto& ullmanArray : ullmanArrays)
+	{
+		bool isSubGraph = true;
+		auto tempMatrix = multiplyAdjacencyListBy(ullmanArray);
+		tempMatrix = tempMatrix->transpose();
+	}
+
+std::shared_ptr<Matrix<int> > Graph::multiplyAdjacencyListBy(const Matrix<int>& inMatrix)
+{
+	assert(inMatrix.getColumnsCount() == static_cast<size_t>(nodeCount));
+	auto result = std::make_shared<Matrix<int> >(inMatrix.getRowsCount(), inMatrix.getColumnsCount());
+	for(size_t i = 0; i < inMatrix.getRowsCount(); ++i)    
+	{    
+		for(int j = 0; j < nodeCount; ++j)    
+		{    
+			(*result)[i][j] = 0;    
+			for(size_t k = 0; k < inMatrix.getColumnsCount(); ++k)    
+			{    
+				(*result)[i][j] += inMatrix[i][k] * (adjacencyList.getValueAt(k,j) != nullptr);    
+			}    
+		}    
+	}
+	return result;
 }

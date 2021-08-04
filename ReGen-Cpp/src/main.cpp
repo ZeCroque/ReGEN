@@ -6,9 +6,11 @@ int main()
 	DataManager::getInstance()->init("one_story");
 	declareCommands();
 
-	//DataManager::getInstance()->saveDataAsDotFormat(true, true);
+	std::list<Graph> result;
+	DataManager::getInstance()->worldGraph.getIsomorphicSubGraphs(DataManager::getInstance()->initializationRules.begin()->socialConditions, result);
+	/*DataManager::getInstance()->saveDataAsDotFormat(true, true);
 	DataManager::getInstance()->printTestLayout();
-	DataManager::getInstance()->printStoryModifications();
+	DataManager::getInstance()->printStoryModifications();*/
 	
 	return 0;
 }

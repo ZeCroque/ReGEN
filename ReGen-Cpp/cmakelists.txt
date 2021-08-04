@@ -17,6 +17,8 @@ set(HEADERS
     ${HEADER_DIR}/Rule.h
     ${HEADER_DIR}/Command.h
     ${HEADER_DIR}/TestLayout.h
+    ${HEADER_DIR}/Utils.h
+    ${HEADER_DIR}/Matrix.h
 )
 
 set(SOURCES

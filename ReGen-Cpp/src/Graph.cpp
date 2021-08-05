@@ -322,9 +322,21 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<Graph
 	for(const auto& ullmanArray : ullmanArrays)
 	{
 		bool isSubGraph = true;
-		auto tempMatrix = multiplyAdjacencyListBy(ullmanArray);
-		tempMatrix = tempMatrix->transpose();
+		const auto ullmanMatrix = (ullmanArray * *multiplyAdjacencyListBy(ullmanArray)->transpose())->transpose();
+		for(int i = 0; i < p_a; ++i)
+		{
+			for(int j = 0; j < p_a; ++j)
+			{
+				if(inSearchedGraph.adjacencyList.getValueAt(i,j) && !((*ullmanMatrix)[i][j] == 1))
+				{
+					isSubGraph = false;
+					break;
+				}
+			}
+		}
+		PRINTLN(isSubGraph);
 	}
+}
 
 std::shared_ptr<Matrix<int> > Graph::multiplyAdjacencyListBy(const Matrix<int>& inMatrix)
 {

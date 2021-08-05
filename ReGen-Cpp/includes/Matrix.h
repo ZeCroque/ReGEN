@@ -172,12 +172,12 @@ template <class T> std::shared_ptr<Matrix<T> > Matrix<T>::operator*(const Matrix
 
 template <class T> std::shared_ptr<Matrix<T>> Matrix<T>::transpose()
 {
-	auto result = std::make_shared<Matrix<T> >(rowsCount, columnsCount);
+	auto result = std::make_shared<Matrix<T> >(columnsCount, rowsCount);
     for (size_t i = 0; i < rowsCount; ++i)
     {
         for (size_t j = 0; j < columnsCount; ++j)
         {
-            (*result->matrix)[i][j] = (*matrix)[j][i];
+            (*result->matrix)[j][i] = (*matrix)[i][j];
 		}
 	}
 	return result;

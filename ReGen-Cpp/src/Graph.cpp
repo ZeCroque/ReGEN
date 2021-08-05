@@ -257,24 +257,11 @@ void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontC
 
 void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<Graph>& outFoundSubGraphs)
 {
-	auto s_graph_nodes = inSearchedGraph.nodesByName; 
-	
-	const int p_a = inSearchedGraph.nodeCount;
-	const int p_b = nodeCount;
-
-	int** m = new int*[p_a];
-	for(auto i = 0; i < p_a; ++i)
+	//Find subNodes for each nodes of searched graph
+	Matrix<int> m(inSearchedGraph.nodeCount, nodeCount);
+	for(int row = 0; row < inSearchedGraph.nodeCount; ++row)
 	{
-		m[i] = new int[p_b];
-		for(int j = 0; j < p_b; ++j)
-		{
-			m[i][j] = 0;
-		}
-	}
-	
-	for(int row = 0; row < p_a; ++row)
-	{
-		for(int col = 0; col < p_b; ++col)
+		for(int col = 0; col < nodeCount; ++col)
 		{
 			if(const auto node = nodesByIndex.at(col), subNode = inSearchedGraph.nodesByIndex.at(row); node->incomingEdges.size() >= subNode->incomingEdges.size()
 				&& node->outgoingEdges.size() >= subNode->outgoingEdges.size()
@@ -285,12 +272,13 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<Graph
 		}
 	}
 
+	//List found subNodesIndexes by searchedNodeIndexes
 	std::vector<std::vector<int> > subNodesIndexes;
-	subNodesIndexes.resize(p_a);
-	for(int row = 0; row < p_a; ++row)
+	subNodesIndexes.resize(inSearchedGraph.nodeCount);
+	for(int row = 0; row < inSearchedGraph.nodeCount; ++row)
 	{
-		subNodesIndexes[row].reserve(p_b);
-		for(int col = 0; col < p_b; ++col)
+		subNodesIndexes[row].reserve(nodeCount);
+		for(int col = 0; col < nodeCount; ++col)
 		{
 			if(m[row][col])
 			{
@@ -298,20 +286,32 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<Graph
 			}
 		}
 	}
-	
-	auto nodesCombinations = Math::customCartesianProduct(subNodesIndexes[0], subNodesIndexes[1]);
-	for(auto i = 2; i < p_a; ++i)
+
+	//Create all singleton combinations of subNodes
+	std::vector<std::vector<int> > nodesCombinations;
+	if(subNodesIndexes.size() > 1)
 	{
-		nodesCombinations = Math::customCartesianProduct(subNodesIndexes[i], nodesCombinations);
+		nodesCombinations = Math::customCartesianProduct(subNodesIndexes[0], subNodesIndexes[1]);
+		for(auto i = 2; i < inSearchedGraph.nodeCount; ++i)
+		{
+			nodesCombinations = Math::customCartesianProduct(subNodesIndexes[i], nodesCombinations);
+		}
+	}
+	else if(subNodesIndexes.size() == 1)
+	{
+		for(const auto& subNodeIndex : subNodesIndexes[0])
+		{
+			nodesCombinations.emplace_back(std::vector{subNodeIndex});	
+		}
 	}
 
+	//Create ullman arrays
 	std::vector<Matrix<int> > ullmanArrays;
 	ullmanArrays.resize(nodesCombinations.size());
-
 	auto currentArrayIndex = 0;
 	for (auto& nodesCombination : nodesCombinations)
 	{
-		ullmanArrays[currentArrayIndex] = Matrix<int>(p_a, p_b);
+		ullmanArrays[currentArrayIndex] = Matrix<int>(inSearchedGraph.nodeCount, nodeCount);
 		for(size_t row = 0; row < nodesCombination.size(); ++row)
 		{
 			ullmanArrays[currentArrayIndex][row][nodesCombination[row]] = 1;
@@ -319,13 +319,14 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<Graph
 		++currentArrayIndex;
 	}
 
+	//Checks for isomorphism
 	for(const auto& ullmanArray : ullmanArrays)
 	{
 		bool isSubGraph = true;
 		const auto ullmanMatrix = (ullmanArray * *multiplyAdjacencyListBy(ullmanArray)->transpose())->transpose();
-		for(int i = 0; i < p_a; ++i)
+		for(int i = 0; i < inSearchedGraph.nodeCount; ++i)
 		{
-			for(int j = 0; j < p_a; ++j)
+			for(int j = 0; j < inSearchedGraph.nodeCount; ++j)
 			{
 				if(inSearchedGraph.adjacencyList.getValueAt(i,j) && !((*ullmanMatrix)[i][j] == 1))
 				{
@@ -334,7 +335,11 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<Graph
 				}
 			}
 		}
-		PRINTLN(isSubGraph);
+
+		if(isSubGraph)
+		{
+			//TODO
+		}
 	}
 }
 
@@ -347,7 +352,7 @@ std::shared_ptr<Matrix<int> > Graph::multiplyAdjacencyListBy(const Matrix<int>& 
 		for(int j = 0; j < nodeCount; ++j)    
 		{    
 			(*result)[i][j] = 0;    
-			for(size_t k = 0; k < inMatrix.getColumnsCount(); ++k)    
+			for(int k = 0; k < static_cast<int>(inMatrix.getColumnsCount()); ++k)    
 			{    
 				(*result)[i][j] += inMatrix[i][k] * (adjacencyList.getValueAt(k,j) != nullptr);    
 			}    

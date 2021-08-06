@@ -4,6 +4,7 @@
 #include <fstream>
 #include <pugixml.hpp>
 
+#include "Conditions.h"
 #include "Utils.h"
 
 Node::Node() : index(NONE)
@@ -24,6 +25,11 @@ const std::string& Node::getModificationName() const
 	return modificationName;
 }
 
+const std::unordered_map<std::string, NodeAttribute>& Node::getAttributes() const
+{
+	return attributes;
+}
+
 const NodeAttribute& Node::getAttribute(const std::string& inAttributeName) const
 {
 	return attributes.at(inAttributeName);
@@ -32,6 +38,15 @@ const NodeAttribute& Node::getAttribute(const std::string& inAttributeName) cons
 void Node::setAttribute(const std::string& inAttributeName, const NodeAttribute& inAttributeValue)
 {
 	attributes[inAttributeName] = inAttributeValue;
+}
+
+std::shared_ptr<ConditionsBlock> Node::getConditionsBlock() const
+{
+	if(!conditionsBlock)
+	{
+		conditionsBlock.reset(new ConditionsBlock());
+	}
+	return conditionsBlock;
 }
 
 const std::list<std::shared_ptr<Edge>>& Node::getIncomingEdges() const

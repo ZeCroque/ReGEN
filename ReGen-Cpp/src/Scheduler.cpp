@@ -2,6 +2,7 @@
 
 #include "DataManager.h"
 #include "Rule.h"
+#include "Conditions.h"
 
 Scheduler::Scheduler(const Graph& inGraph) : randomEngine(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count())), graph(inGraph)
 {
@@ -74,17 +75,24 @@ void Scheduler::run()
 		randomDataSet.emplace_back(playerNode);
 	}
 
-	for(const auto& node : randomDataSet)
+	auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] = randomRuleWithDataSets.first;
+	auto startingNode = resultStory.getNodesByIndex().begin()->second;
+	for(const auto& [socialNodeIndex, socialNode] : socialConditions.getNodesByIndex())
 	{
-		PRINTLN(node->getName());
+		for(const auto& [attributeName, attributeData] : socialNode->getAttributes())
+		{
+			startingNode->getConditionsBlock()->preConditions.nodeConditions.emplace_back(NodeCondition{socialNode, attributeName, attributeData.value});
+		}
 
+		for(const auto& edge : socialNode->getOutgoingEdges())
+		{
+			startingNode->getConditionsBlock()->preConditions.edgeConditions.emplace_back(*edge);
+		}
 	}
 	
-	auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] = randomRuleWithDataSets.first;
 	for(const auto& [storyNodeIndex, storyNode] : storyGraph.getNodesByIndex())
 	{
 		const auto index = socialConditions.getNodeByName(storyNode->getAttribute("target").value)->getIndex();
-
 		count = 0;
 		for(const auto& node : randomDataSet)
 		{

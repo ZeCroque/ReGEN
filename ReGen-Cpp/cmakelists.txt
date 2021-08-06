@@ -19,6 +19,7 @@ set(HEADERS
     ${HEADER_DIR}/TestLayout.h
     ${HEADER_DIR}/Utils.h
     ${HEADER_DIR}/Scheduler.h
+    ${HEADER_DIR}/Conditions.h
 )
 
 set(SOURCES

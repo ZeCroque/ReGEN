@@ -15,7 +15,7 @@ void CommandRegistry::executeCommand(const CommandData& inCommandData) const
 	find(inCommandData.name)->implementation(inCommandData);
 }
 
-Conditions CommandRegistry::getCommandConditions(const CommandData& inCommandData) const
+ConditionsBlock CommandRegistry::getCommandConditions(const CommandData& inCommandData) const
 {
 	return find(inCommandData.name)->conditionConstructor(inCommandData);
 }

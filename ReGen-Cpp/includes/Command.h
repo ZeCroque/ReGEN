@@ -4,7 +4,7 @@
 #include <any>
 #include <functional>
 
-using Condition = int; //TODO do proper Condition struct
+#include "Conditions.h"
 
 struct CommandData
 {
@@ -13,16 +13,10 @@ struct CommandData
 	std::vector<std::any> arguments;
 };
 
-struct Conditions
-{
-	std::list<Condition> preConditions;
-	std::list<Condition> postConditions;
-};
-
 struct Command
 {
 	std::function<void(const CommandData&)> implementation;
-	std::function<Conditions(const CommandData&)> conditionConstructor;
+	std::function<ConditionsBlock(const CommandData&)> conditionConstructor;
 };
 
 #endif // COMMAND_H

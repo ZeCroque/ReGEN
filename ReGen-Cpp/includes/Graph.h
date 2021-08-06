@@ -18,6 +18,7 @@ struct NodeAttribute
 };
 
 class Edge;
+struct ConditionsBlock;
 
 class Node
 {
@@ -28,8 +29,10 @@ public:
 	
 	[[nodiscard]] const std::string& getName() const;
 	[[nodiscard]] const std::string& getModificationName() const;
+	[[nodiscard]] const std::unordered_map<std::string, NodeAttribute>& getAttributes() const;
 	[[nodiscard]] const NodeAttribute& getAttribute(const std::string& inAttributeName) const;
 	void setAttribute(const std::string& inAttributeName, const NodeAttribute& inAttributeValue);
+	[[nodiscard]] std::shared_ptr<ConditionsBlock> getConditionsBlock() const;
 	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getIncomingEdges() const;
 	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getOutgoingEdges() const;
 	[[nodiscard]] int getIndex() const;
@@ -42,6 +45,7 @@ private:
 	std::string name;
 	std::string modificationName;
 	std::unordered_map<std::string, NodeAttribute> attributes;
+	mutable std::shared_ptr<ConditionsBlock> conditionsBlock; //TODO complex template dev to prevent non-story graphs from having conditions
 
 	std::list<std::shared_ptr<Edge>> incomingEdges;
 	std::list<std::shared_ptr<Edge>> outgoingEdges;

@@ -20,13 +20,13 @@ void declareCommands()
 			PRINTLN("Command: " + inCommandData.name);
 			PRINTLN(std::any_cast<std::string>(inCommandData.arguments[0]) + " murdered " + inCommandData.caller);
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 1);
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}
@@ -45,13 +45,13 @@ void declareCommands()
 			PRINTLN("Command: " + inCommandData.name);
 			PRINTLN(inCommandData.caller + " died");
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.empty());
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}
@@ -79,13 +79,13 @@ void declareCommands()
 			}
 			PRINTLN("Now have the relationship \"" + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" with " + std::any_cast<std::string>(inCommandData.arguments[2]) + " because of " + std::any_cast<std::string>(inCommandData.arguments[3]));
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 4);
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}
@@ -105,13 +105,13 @@ void declareCommands()
 			PRINTLN("Command: " + inCommandData.name);
 			PRINTLN(inCommandData.caller + " moved to " + std::any_cast<std::string>(inCommandData.arguments[0]));
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 1);
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}
@@ -131,13 +131,13 @@ void declareCommands()
 			PRINTLN("Command: " + inCommandData.name);
 			PRINTLN(inCommandData.caller + " moved to " + std::any_cast<std::string>(inCommandData.arguments[0]) + "'s location");
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 1);
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}
@@ -157,13 +157,13 @@ void declareCommands()
 			PRINTLN("Command: " + inCommandData.name);
 			PRINTLN(inCommandData.caller + " killed " + std::any_cast<std::string>(inCommandData.arguments[0]));
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 1);
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}
@@ -185,13 +185,13 @@ void declareCommands()
 			PRINTLN("Command: " + inCommandData.name);
 			PRINTLN(inCommandData.caller + " is now owned by " + std::any_cast<std::string>(inCommandData.arguments[0]) + " and has status \""  + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" because of "  + std::any_cast<std::string>(inCommandData.arguments[2]));
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 3);
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}
@@ -213,13 +213,13 @@ void declareCommands()
 			PRINTLN("Command: " + inCommandData.name);
 			PRINTLN(inCommandData.caller + " now has \"" + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" relationship with " + std::any_cast<std::string>(inCommandData.arguments[0]) + " because of " + std::any_cast<std::string>(inCommandData.arguments[2]));
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 3);
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}
@@ -240,13 +240,13 @@ void declareCommands()
 			PRINTLN("Command: " + inCommandData.name);
 			PRINTLN(inCommandData.caller + "'s \"" + std::any_cast<std::string>(inCommandData.arguments[0]) + "\" attribute is now equal to " + std::any_cast<std::string>(inCommandData.arguments[1]));
 		},
-		[](const CommandData& inCommandData) -> Conditions
+		[](const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 2);
 			return
 			{
-				std::list<Condition>{},
-				std::list<Condition>{}
+				{},
+				{}
 
 			};
 		}

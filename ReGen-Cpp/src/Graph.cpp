@@ -293,7 +293,7 @@ void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::sh
 		}
 		
 		adjacencyList.at(sourceNodeIndex, targetNodeIndex) = 1;
-		edgesByNodesIndex[{sourceNodeIndex, targetNodeIndex}] = edge;
+		edgesByNodesIndex[{static_cast<int>(sourceNodeIndex), static_cast<int>(targetNodeIndex)}] = edge;
 
 		edge->sourceNode = std::move(inSourceNode);
 		edge->targetNode = std::move(inTargetNode);	
@@ -378,7 +378,7 @@ void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontC
 }
 
 
-void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::list<std::shared_ptr<Node>>>& outFoundSubGraphs) const
+void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::list<std::shared_ptr<Node>>>& outFoundSubNodes) const
 {
 	//Find subNodes for each nodes of searched graph
 	arma::mat m(inSearchedGraph.nodeCount, nodeCount, arma::fill::zeros);
@@ -443,6 +443,7 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 	}
 
 	//Checks for isomorphism
+	std::list<std::list<std::shared_ptr<Node>>> isomorphNodes;
 	for(const auto& ullmanArray : ullmanArrays)
 	{
 		bool isSubGraph = true;
@@ -472,7 +473,67 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 					}
 				}
 			}
-			outFoundSubGraphs.push_back(foundSubNodes);
+			isomorphNodes.push_back(foundSubNodes);
 		}
 	}
+	for(auto& subNodes : isomorphNodes)
+	{
+		bool isCorrect = true;
+		auto subNode = subNodes.begin();
+		for(auto i = 0; i < static_cast<int>(subNodes.size()) - 1; ++i)
+		{
+			auto previousNode = subNode;
+			++subNode;
+
+			const auto nextIndex = i + 1;
+			
+			if(static_cast<int>(inSearchedGraph.adjacencyList.at(i, nextIndex)))
+			{
+				if(auto edge = inSearchedGraph.edgesByNodesIndex.at({i, nextIndex}); !Node::containsEdges({edgesByNodesIndex.at({previousNode->get()->index, subNode->get()->index})}, {edge}))
+				{
+					isCorrect = false;
+					break;
+				}
+			}
+
+			if(static_cast<int>(inSearchedGraph.adjacencyList.at(nextIndex, i)))
+			{
+				if(auto edge = inSearchedGraph.edgesByNodesIndex.at({nextIndex, i}); !Node::containsEdges({edgesByNodesIndex.at({subNode->get()->index, previousNode->get()->index})}, {edge}))
+				{
+					isCorrect = false;
+					break;
+				}
+			}
+		}
+
+		if(isCorrect && inSearchedGraph.nodeCount > 1)
+		{
+			const auto lastNode = --subNodes.end();
+			const auto beforeLastNode  = --(--subNodes.end());
+			const auto lastIndex = subNodes.size() - 1;
+			const auto beforeLastIndex = subNodes.size() - 2;
+			
+			if(static_cast<int>(inSearchedGraph.adjacencyList.at(beforeLastIndex, lastIndex)))
+			{
+				if(!Node::containsEdges({edgesByNodesIndex.at({beforeLastNode->get()->index, lastNode->get()->index})}, {inSearchedGraph.edgesByNodesIndex.at({beforeLastIndex, lastIndex})}))
+				{
+					isCorrect = false;
+				}
+			}
+
+			if(isCorrect)
+			{
+				if(static_cast<int>(inSearchedGraph.adjacencyList.at( lastIndex, beforeLastIndex)))
+				{
+					if(!Node::containsEdges({edgesByNodesIndex.at({ lastNode->get()->index, beforeLastNode->get()->index})}, {inSearchedGraph.edgesByNodesIndex.at({lastIndex, beforeLastIndex})}))
+					{
+						isCorrect = false;
+					}
+				}
+			}
+		}
+		if(isCorrect)
+		{
+			outFoundSubNodes.emplace_back(subNodes);
+		}
 }

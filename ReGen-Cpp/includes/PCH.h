@@ -3,6 +3,12 @@
 
 #include <cassert>
 #include <string>
+#include <memory>
+
+#include <unordered_map>
+#include <map>
+#include <vector>
+#include <list>
 
 #ifndef NDEBUG
 #include <iostream>

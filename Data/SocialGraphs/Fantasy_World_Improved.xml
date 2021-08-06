@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<graph name="Fantasy_World">
+<graph name="Fantasy_World" type="Social_Graph">
   <nodes>
     <node name="Regal_Regis">
       <attr name="alive" type="bool">

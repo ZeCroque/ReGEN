@@ -1,8 +1,6 @@
 #ifndef MATH_H
 #define MATH_H
 
-#include <vector>
-
 namespace Math
 {
 	//Doesn't return tuples with duplicated elements

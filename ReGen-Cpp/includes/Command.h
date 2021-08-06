@@ -3,7 +3,6 @@
 
 #include <any>
 #include <functional>
-#include <list>
 
 using Condition = int; //TODO do proper Condition struct
 

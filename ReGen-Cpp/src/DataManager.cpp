@@ -140,6 +140,27 @@ void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool i
 		}
 	}
 }
+#endif
+
+const TestLayout& DataManager::getTestLayout() const
+{
+	return testLayout;
+}
+
+const Graph& DataManager::getWorldGraph() const
+{
+	return worldGraph;
+}
+
+const std::list<Rule>& DataManager::getInitializationRules() const
+{
+	return initializationRules;
+}
+
+const std::list<Rule>& DataManager::getRewriteRules() const
+{
+	return rewriteRules;
+}
 
 void DataManager::readArguments(const pugi::xml_node inParsedArguments, std::vector<std::any>& outArguments)
 {
@@ -163,7 +184,6 @@ void DataManager::readArguments(const pugi::xml_node inParsedArguments, std::vec
 		}
 	}
 }
-#endif
 
 void DataManager::loadRules(const std::string& inRulesPath, const pugi::xml_node& inRulesListingNode, std::list<Rule>& outRulesList) const
 {

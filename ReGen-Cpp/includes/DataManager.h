@@ -18,6 +18,11 @@ public:
 	void saveDataAsDotFormat(bool inPrintWorldGraph = true, bool inPrintRules = false) const;
 #endif
 
+	[[nodiscard]] const TestLayout& getTestLayout() const;
+	[[nodiscard]] const Graph& getWorldGraph() const;
+	[[nodiscard]] const std::list<Rule>& getInitializationRules() const;
+	[[nodiscard]] const std::list<Rule>& getRewriteRules() const;
+	
 private:
 	static void readArguments(pugi::xml_node inParsedArguments, std::vector<std::any>& outArguments);
 	void loadRules(const std::string& inRulesPath, const pugi::xml_node& inRulesListingNode, std::list<Rule>& outRulesList) const;

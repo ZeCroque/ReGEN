@@ -510,8 +510,8 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 		{
 			const auto lastNode = --subNodes.end();
 			const auto beforeLastNode  = --(--subNodes.end());
-			const auto lastIndex = subNodes.size() - 1;
-			const auto beforeLastIndex = subNodes.size() - 2;
+			const int lastIndex = static_cast<int>(subNodes.size() - 1);
+			const int beforeLastIndex = static_cast<int>(subNodes.size() - 2);
 			
 			if(static_cast<int>(inSearchedGraph.adjacencyList.at(beforeLastIndex, lastIndex)))
 			{
@@ -536,4 +536,5 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 		{
 			outFoundSubNodes.emplace_back(subNodes);
 		}
+	}
 }

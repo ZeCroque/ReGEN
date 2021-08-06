@@ -278,15 +278,14 @@ void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::sh
 	if(!edge)
 	{	
 		edge.reset(new Edge());
-		edge->sourceNode = inSourceNode;
-		edge->targetNode = inTargetNode;	
+
 		inSourceNode->outgoingEdges.emplace_back(edge);
 		inTargetNode->incomingEdges.emplace_back(edge);
 		
 		edgesByNodesNames[{inSourceNode->name, inTargetNode->name}] = edge;
 		
-		const auto sourceNodeIndex = inSourceNode->index;
-		const auto targetNodeIndex = inTargetNode->index;
+		const size_t sourceNodeIndex = inSourceNode->index;
+		const size_t targetNodeIndex = inTargetNode->index;
 
 		if(adjacencyList.size() <= sourceNodeIndex || adjacencyList.size() <= targetNodeIndex)
 		{
@@ -295,18 +294,21 @@ void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::sh
 		
 		adjacencyList.at(sourceNodeIndex, targetNodeIndex) = 1;
 		edgesByNodesIndex[{sourceNodeIndex, targetNodeIndex}] = edge;
+
+		edge->sourceNode = std::move(inSourceNode);
+		edge->targetNode = std::move(inTargetNode);	
 		
 		++edgeCount;
 	}
 	edge->attributes.insert(std::move(inEdgeAttribute));
 }
 
-void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, const int inSourceIndex, const int inTargetIndex)
+void Graph::addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, const int inSourceIndex, const int inTargetIndex)
 {
 	addEdge(inEdgeAttribute, nodesByIndex.at(inSourceIndex), nodesByIndex.at(inTargetIndex));
 }
 
-void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName)
+void Graph::addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName)
 {
 	addEdge(inEdgeAttribute, nodesByName.at(inSourceNodeName), nodesByName.at(inTargetNodeName));
 }

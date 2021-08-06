@@ -86,8 +86,8 @@ class Graph
 	void loadFromXml(const std::string& inPath);
 	void addNode(Node* inNode);
 	void addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode);
-	void addEdge(std::pair<std::string, std::string> inEdgeAttribute, int inSourceIndex, int inTargetIndex);
-    void addEdge(std::pair<std::string, std::string> inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName);
+	void addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, int inSourceIndex, int inTargetIndex);
+    void addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName);
     void saveAsDotFile(const std::string& inColor = "ivory4", const std::string& inFontColor = "ivory4", const std::string& inOutputPath = "./Output", bool inLogAdjacencyMatrix = false) const;
 	void getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::list<std::shared_ptr<Node>>>& outFoundSubGraphs) const;
 

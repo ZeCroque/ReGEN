@@ -138,6 +138,10 @@ bool Node::containsEdges(const std::list<std::shared_ptr<Edge>>& inNodeEdges, co
 	return true; //Else they are
 }
 
+Edge::Edge(std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode, std::unordered_map<std::string, std::string> inAttributes) : sourceNode(std::move(inSourceNode)), targetNode(std::move(inTargetNode)), attributes(std::move(inAttributes))
+{
+}
+
 std::shared_ptr<Node> Edge::getSourceNode() const
 {
 	return sourceNode;

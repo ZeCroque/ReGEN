@@ -10,8 +10,8 @@ class CommandRegistry final : public Singleton<CommandRegistry>
 
 public:
 	void registerCommand(const std::string& inKey, Command* inObject) const;
-	void executeCommand(const CommandData& inCommandData) const;
-	[[nodiscard]] ConditionsBlock getCommandConditions(const CommandData& inCommandData) const;
+	void executeCommand(const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) const;
+	[[nodiscard]] ConditionsBlock getCommandConditions(const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) const;
 
 private:
 	Command* find(const std::string& inKey) const;

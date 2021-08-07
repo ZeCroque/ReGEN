@@ -89,7 +89,7 @@ void DataManager::printStoryModifications()
 			PRINT_SEPARATOR();
 			for(const auto& commandData : commandsData)
 			{
-				CommandRegistry::getInstance()->executeCommand(commandData);
+				CommandRegistry::getInstance()->executeCommand({}, commandData);
 				PRINT_SEPARATOR();
 			}
 			PRINTLN("");

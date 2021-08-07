@@ -1,5 +1,6 @@
 #include "Scheduler.h"
 
+#include "CommandsRegistry.h"
 #include "DataManager.h"
 #include "Rule.h"
 #include "Conditions.h"
@@ -46,37 +47,35 @@ void Scheduler::run()
 	}
 	PRINTLN("Randomly picked the " + randomRuleWithDataSets.first.name + " rule.");
 
+	auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] = randomRuleWithDataSets.first;
+	
 	randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(randomRuleWithDataSets.second.size()) - 1};
 	targetIndex = randomIntDistribution(randomEngine);
 	count = 0;
+	std::unordered_map<std::string, std::shared_ptr<Node> > cast;
 	std::list<std::shared_ptr<Node> > randomDataSet;
 	for(const auto& ruleDataSet : randomRuleWithDataSets.second)
 	{
 		if(targetIndex == count)
 		{
+			int i = 0;
+			for(const auto& socialNode : ruleDataSet)
+			{
+				cast[socialConditions.getNodeByIndex(i)->getName()] = socialNode;
+				++i;
+			}
 			randomDataSet = ruleDataSet;
 			break;
 		}
 		++count;
 	}
 
-	const auto playerNode = DataManager::getInstance()->getWorldGraph().getNodeByName("Player");
-	bool playerYetAdded = false;
-	for(const auto& node : randomDataSet)
+	if(!cast.contains("Player"))
 	{
-		if(node->getName() == playerNode->getName())
-		{
-			playerYetAdded = true;
-			break;
-		}
-	}
-	if(!playerYetAdded)
-	{
-		randomDataSet.emplace_back(playerNode);
+		cast["Player"] = DataManager::getInstance()->getWorldGraph().getNodeByName("Player");
 	}
 
-	auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] = randomRuleWithDataSets.first;
-	auto startingNode = resultStory.getNodesByIndex().begin()->second;
+	const auto startingNode = resultStory.getNodesByIndex().begin()->second;
 	for(const auto& [socialNodeIndex, socialNode] : socialConditions.getNodesByIndex())
 	{
 		for(const auto& [attributeName, attributeData] : socialNode->getAttributes())
@@ -113,6 +112,11 @@ void Scheduler::run()
 	}
 	resultStory.addEdge({"N/A", "N/A"}, 0, 2); //Between start node and first story node
 	resultStory.addEdge({"N/A", "N/A"}, resultStory.getNodeCount() - 1, 1);
+
+	
+	auto commandConditions = CommandRegistry::getInstance()->getCommandConditions(cast, *nodeModificationArguments.at("Kill_Victim").begin()); //TODO remove debug
+	//TODO rewrite rules
+
 	resultStory.saveAsDotFile();
 }
 

@@ -15,8 +15,8 @@ struct CommandData
 
 struct Command
 {
-	std::function<void(const CommandData&)> implementation;
-	std::function<ConditionsBlock(const CommandData&)> conditionConstructor;
+	std::function<void(const std::unordered_map<std::string, std::shared_ptr<Node> >&, const CommandData&)> implementation;
+	std::function<ConditionsBlock(const std::unordered_map<std::string, std::shared_ptr<Node> >&, const CommandData&)> conditionConstructor;
 };
 
 #endif // COMMAND_H

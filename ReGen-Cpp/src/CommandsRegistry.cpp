@@ -10,14 +10,14 @@ void CommandRegistry::registerCommand(const std::string& inKey, Command* inObjec
 	assert(false);	
 }
 
-void CommandRegistry::executeCommand(const CommandData& inCommandData) const
+void CommandRegistry::executeCommand(const std::unordered_map<std::string, std::shared_ptr<Node>>& inCast, const CommandData& inCommandData) const
 {
-	find(inCommandData.name)->implementation(inCommandData);
+	find(inCommandData.name)->implementation(inCast, inCommandData);
 }
 
-ConditionsBlock CommandRegistry::getCommandConditions(const CommandData& inCommandData) const
+ConditionsBlock CommandRegistry::getCommandConditions(const std::unordered_map<std::string, std::shared_ptr<Node>>& inCast, const CommandData& inCommandData) const
 {
-	return find(inCommandData.name)->conditionConstructor(inCommandData);
+	return find(inCommandData.name)->conditionConstructor(inCast, inCommandData);
 }
 
 Command* CommandRegistry::find(const std::string& inKey) const

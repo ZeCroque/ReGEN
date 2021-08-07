@@ -58,6 +58,7 @@ class Edge
 
 public:
 	Edge() = default;
+	Edge(std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode, std::unordered_map<std::string, std::string> inAttributes);
 
 	[[nodiscard]] std::shared_ptr<Node> getSourceNode() const;
 	[[nodiscard]] std::shared_ptr<Node> getTargetNode() const;

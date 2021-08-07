@@ -25,15 +25,15 @@ class Node
 friend class Graph;
 public:
 	Node();
-	Node(std::string inName, std::string inModificationName, std::unordered_map<std::string, NodeAttribute> inAttributes);
+	Node(std::string inName, std::unordered_map<std::string, NodeAttribute> inAttributes);
 	
 	[[nodiscard]] const std::string& getName() const;
-	[[nodiscard]] const std::string& getModificationName() const;
 	[[nodiscard]] const std::unordered_map<std::string, NodeAttribute>& getAttributes() const;
 	[[nodiscard]] const NodeAttribute& getAttribute(const std::string& inAttributeName) const;
 	void setAttribute(const std::string& inAttributeName, const NodeAttribute& inAttributeValue);
 	[[nodiscard]] std::shared_ptr<ConditionsBlock> getConditionsBlock() const;
-	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getIncomingEdges() const;
+	void setConditionsBlock(ConditionsBlock& inConditionsBlock) const;
+[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getIncomingEdges() const;
 	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getOutgoingEdges() const;
 	[[nodiscard]] int getIndex() const;
 
@@ -45,7 +45,6 @@ public:
 
 private:	
 	std::string name;
-	std::string modificationName;
 	std::unordered_map<std::string, NodeAttribute> attributes;
 	mutable std::shared_ptr<ConditionsBlock> conditionsBlock; //TODO complex template dev to prevent non-story graphs from having conditions
 
@@ -65,6 +64,10 @@ public:
 	[[nodiscard]] std::shared_ptr<Node> getSourceNode() const;
 	[[nodiscard]] std::shared_ptr<Node> getTargetNode() const;
 	[[nodiscard]] const std::unordered_map<std::string, std::string>& getAttributes() const;
+
+#ifndef NDEBUG
+	void print() const;
+#endif
 
 private:
 	std::shared_ptr<Node> sourceNode;

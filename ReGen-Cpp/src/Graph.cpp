@@ -11,18 +11,13 @@ Node::Node() : index(NONE)
 {
 }
 
-Node::Node(std::string inName, std::string inModificationName, std::unordered_map<std::string, NodeAttribute> inAttributes) : name(std::move(inName)), modificationName(std::move(inModificationName)), attributes(std::move(inAttributes)), index(NONE)
+Node::Node(std::string inName, std::unordered_map<std::string, NodeAttribute> inAttributes) : name(std::move(inName)), attributes(std::move(inAttributes)), index(NONE)
 {
 }
 
 const std::string& Node::getName() const
 {
 	return name;
-}
-
-const std::string& Node::getModificationName() const
-{
-	return modificationName;
 }
 
 const std::unordered_map<std::string, NodeAttribute>& Node::getAttributes() const
@@ -47,6 +42,11 @@ std::shared_ptr<ConditionsBlock> Node::getConditionsBlock() const
 		conditionsBlock.reset(new ConditionsBlock());
 	}
 	return conditionsBlock;
+}
+
+void Node::setConditionsBlock(ConditionsBlock& inConditionsBlock) const
+{
+	conditionsBlock = std::make_shared<ConditionsBlock>(inConditionsBlock);
 }
 
 const std::list<std::shared_ptr<Edge>>& Node::getIncomingEdges() const
@@ -185,6 +185,16 @@ const std::unordered_map<std::string, std::string>& Edge::getAttributes() const
 	return attributes;
 }
 
+#ifndef NDEBUG
+void Edge::print() const
+{
+	for(const auto& [attributeName, attributeValue] : attributes)
+	{
+		PRINTLN(sourceNode->getName() + "_" + attributeName + "_" + attributeValue + "_" + targetNode->getName());
+	}
+}
+#endif
+
 Graph::Graph() : name("none"), type("default"), nodeCount(0), edgeCount(0)
 {
 }
@@ -282,7 +292,6 @@ void Graph::loadFromXml(const pugi::xml_node& inParsedXml)
 			new Node
 			(
 				node.attribute("name").as_string(),
-				std::string(),
 				nodeAttributes
 			)
 		);

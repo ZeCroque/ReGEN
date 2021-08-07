@@ -15,8 +15,8 @@ void Scheduler::run()
 	PRINT_SEPARATOR();
 
 	Graph resultStory("New_Quest", "Story_Graph");
-	resultStory.addNode(new Node("Start_Quest", "N/A", {{"Node_Type", {"str", "Start"}}}));
-	resultStory.addNode(new Node("End_Quest", "N/A", {{"Node_Type", {"str", "End"}}}));
+	resultStory.addNode(new Node("Start_Quest", {{"Node_Type", {"str", "Start"}}}));
+	resultStory.addNode(new Node("End_Quest", {{"Node_Type", {"str", "End"}}}));
 	
 	PRINTLN("Searching for Possible Narrative Rules...");
 	std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRules;
@@ -80,15 +80,28 @@ void Scheduler::run()
 	{
 		for(const auto& [attributeName, attributeData] : socialNode->getAttributes())
 		{
-			startingNode->getConditionsBlock()->preConditions.nodeConditions.emplace_back(NodeCondition{socialNode, attributeName, attributeData.value, ComparisonType::Equal});
+			startingNode->getConditionsBlock()->preConditions.nodeConditions.emplace_back(NodeCondition{cast.at( socialNode->getName()), attributeName, attributeData.value, ComparisonType::Equal});
 		}
 
 		for(const auto& edge : socialNode->getOutgoingEdges())
 		{
-			startingNode->getConditionsBlock()->preConditions.edgeConditions.emplace_back(*edge);
+			startingNode->getConditionsBlock()->preConditions.edgeConditions.emplace_back(EdgeCondition{cast.at(edge->getSourceNode()->getName()), cast.at(edge->getTargetNode()->getName()), edge->getAttributes()});
 		}
 	}
-	
+
+#ifndef NDEBUG
+	constexpr auto printNodeConditions = [](const std::string& inNodeName, std::shared_ptr<ConditionsBlock> inConditionsBlock)
+	{
+		PRINTLN("");
+		PRINT_SEPARATOR();
+		PRINTLN("Conditions for " + inNodeName + " :");
+		PRINT_SEPARATOR();
+		inConditionsBlock->print();
+	};
+
+	printNodeConditions(startingNode->getName(), startingNode->getConditionsBlock());
+#endif
+
 	for(const auto& [storyNodeIndex, storyNode] : storyGraph.getNodesByIndex())
 	{
 		const auto index = socialConditions.getNodeByName(storyNode->getAttribute("target").value)->getIndex();
@@ -99,12 +112,27 @@ void Scheduler::run()
 			{
 				auto* generatedNode = new Node(*storyNode);
 				generatedNode->setAttribute("target", {"str", node->getName()});
+				ConditionsBlock conditionsBlock;
+				for(const auto& commandData : nodeModificationArguments.at(generatedNode->getName()))
+				{
+					conditionsBlock.append(CommandRegistry::getInstance()->getCommandConditions(cast,  commandData));
+				}
+				generatedNode->setConditionsBlock(conditionsBlock);
+#ifndef NDEBUG
+				printNodeConditions(generatedNode->getName(), generatedNode->getConditionsBlock());
+#endif
 				resultStory.addNode(generatedNode);
 				break;
 			}
 			++count;
 		}
 	}
+
+#ifndef NDEBUG
+	const auto lastNode = (++resultStory.getNodesByIndex().begin())->second;
+	printNodeConditions(lastNode->getName(), lastNode->getConditionsBlock());
+#endif
+
 
 	for(const auto& [storyEdgeNames, storyEdge] : storyGraph.getEdgesByNodesNames())
 	{
@@ -113,8 +141,6 @@ void Scheduler::run()
 	resultStory.addEdge({"N/A", "N/A"}, 0, 2); //Between start node and first story node
 	resultStory.addEdge({"N/A", "N/A"}, resultStory.getNodeCount() - 1, 1);
 
-	
-	auto commandConditions = CommandRegistry::getInstance()->getCommandConditions(cast, *nodeModificationArguments.at("Kill_Victim").begin()); //TODO remove debug
 	//TODO rewrite rules
 
 	resultStory.saveAsDotFile();

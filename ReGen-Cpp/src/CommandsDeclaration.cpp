@@ -6,20 +6,20 @@ void declareCommands()
 {
 	const auto* commandRegistry = CommandRegistry::getInstance();
 
-	auto changeAffinityTowardTarget = [](const std::shared_ptr<Node> inCaller, std::list<std::pair<std::string, std::string> >&& inRequiredRelations, const std::shared_ptr<Node> inTarget, const std::string& inNewRelationName, const std::string& inTemplatedReason) -> ConditionsBlock  // NOLINT(performance-unnecessary-value-param)
+	auto changeAffinityTowardTarget = [](const std::shared_ptr<Node> inCaller, const std::list<std::string>& inRequiredRelations, const std::shared_ptr<Node> inTarget, const std::string& inNewRelationName, const std::string& inTemplatedReason) -> ConditionsBlock  // NOLINT(performance-unnecessary-value-param)
 	{	
 		const auto& reason = inTemplatedReason + inCaller->getName();
 
 		ConditionsBlock result;
 		for(const auto& edge : inCaller->getIncomingEdges())
 		{
-			for(auto& [relationName, relationReason] : inRequiredRelations)
+			for(auto& requiredRelation : inRequiredRelations)
 			{
-				if(edge->getAttributes().contains<std::string>(relationName))
+				if(auto foundAttribute = edge->getAttributes().find<std::string>(requiredRelation); foundAttribute != edge->getAttributes().end())
 				{
 					if(const auto sourceNode = edge->getSourceNode(); !(sourceNode->getName() == inTarget->getName()))
 					{
-						result.preConditions.edgeConditions.emplace_back(EdgeCondition{sourceNode, inCaller, {{relationName, relationReason}}});
+						result.preConditions.edgeConditions.emplace_back(EdgeCondition{sourceNode, inCaller, {{foundAttribute->first, foundAttribute->second}}});
 						result.postConditions.edgeConditions.emplace_back(EdgeCondition{sourceNode, inTarget, {{inNewRelationName, reason}}});
 					}
 				}
@@ -45,12 +45,8 @@ void declareCommands()
 		[changeAffinityTowardTarget](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 1);
-			auto result = changeAffinityTowardTarget(inCast.at(inCommandData.caller), {{"Loves","Friends"}}, inCast.at(std::any_cast<std::string>(inCommandData.arguments[0])), "Hates", "Murder_of_");
-
-			auto [preConditions, postConditions] = changeAffinityTowardTarget(inCast.at(inCommandData.caller), {{"Hates","Enemies"}}, inCast.at(std::any_cast<std::string>(inCommandData.arguments[0])), "Friends", "Murder_of_");
-			result.preConditions.edgeConditions.splice(result.preConditions.edgeConditions.end(), preConditions.edgeConditions);
-			result.postConditions.edgeConditions.splice(result.postConditions.edgeConditions.end(), postConditions.edgeConditions);
-			
+			auto result = changeAffinityTowardTarget(inCast.at(inCommandData.caller), {"Loves","Friends"}, inCast.at(std::any_cast<std::string>(inCommandData.arguments[0])), "Hates", "Murder_of_");
+			result.append(changeAffinityTowardTarget(inCast.at(inCommandData.caller), {"Hates","Enemies"}, inCast.at(std::any_cast<std::string>(inCommandData.arguments[0])), "Friends", "Murder_of_"));
 			return result;
 		}
 	});
@@ -101,9 +97,12 @@ void declareCommands()
 		[changeAffinityTowardTarget](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 4);
-			const auto& edgeAttribute = std::any_cast<std::vector<std::any> >(inCommandData.arguments[0]);
-			assert(edgeAttribute.size() == 2);
-			return changeAffinityTowardTarget(inCast.at(inCommandData.caller), {{std::any_cast<std::string>(edgeAttribute[0]), std::any_cast<std::string>(edgeAttribute[1])}}, inCast.at(std::any_cast<std::string>(inCommandData.arguments[2])), std::any_cast<std::string>(inCommandData.arguments[1]), std::any_cast<std::string>(inCommandData.arguments[3]));
+			std::list<std::string> requiredRelations;
+			for(auto& element : std::any_cast<std::vector<std::any> >(inCommandData.arguments[0]))
+			{
+				requiredRelations.emplace_back(std::any_cast<std::string>(element));
+			}
+			return changeAffinityTowardTarget(inCast.at(inCommandData.caller), requiredRelations, inCast.at(std::any_cast<std::string>(inCommandData.arguments[2])), std::any_cast<std::string>(inCommandData.arguments[1]), std::any_cast<std::string>(inCommandData.arguments[3]));
 		}
 	});
 

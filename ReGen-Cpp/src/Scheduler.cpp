@@ -25,7 +25,7 @@ void Scheduler::run()
 	if(possibleRules.empty())
 	{
 		PRINTLN("No possible rules found. Generation failed.");
-		exit(0);
+		return; //TODO proper failure handling
 	}
 	
 	std::uniform_int_distribution randomIntDistribution{0, static_cast<int>(possibleRules.size()) - 1};
@@ -70,7 +70,7 @@ void Scheduler::run()
 		++count;
 	}
 
-	if(!cast.contains("Player"))
+	if(!cast.contains<std::string>("Player"))
 	{
 		cast["Player"] = DataManager::getInstance()->getWorldGraph().getNodeByName("Player");
 	}
@@ -80,7 +80,7 @@ void Scheduler::run()
 	{
 		for(const auto& [attributeName, attributeData] : socialNode->getAttributes())
 		{
-			startingNode->getConditionsBlock()->preConditions.nodeConditions.emplace_back(NodeCondition{socialNode, attributeName, attributeData.value});
+			startingNode->getConditionsBlock()->preConditions.nodeConditions.emplace_back(NodeCondition{socialNode, attributeName, attributeData.value, ComparisonType::Equal});
 		}
 
 		for(const auto& edge : socialNode->getOutgoingEdges())

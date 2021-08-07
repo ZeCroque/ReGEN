@@ -36,7 +36,9 @@ public:
 	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getIncomingEdges() const;
 	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getOutgoingEdges() const;
 	[[nodiscard]] int getIndex() const;
-	
+
+	std::shared_ptr<Node> getSourceNodeFromIncomingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute);
+	std::shared_ptr<Node> getTargetNodeFromOutgoingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute);
 	bool isSubNode(const Node& inParentNode);
 	bool containsAttributes(const Node& inParentNode);
 	static bool containsEdges(const std::list<std::shared_ptr<Edge> >& inNodeEdges, const std::list<std::shared_ptr<Edge> >& inParentNodeEdges);

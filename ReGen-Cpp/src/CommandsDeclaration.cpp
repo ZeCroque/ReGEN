@@ -4,7 +4,7 @@
 
 void declareCommands()
 {
-	auto* commandRegistry = CommandRegistry::getInstance();
+	const auto* commandRegistry = CommandRegistry::getInstance();
 
 	auto changeAffinityTowardTarget = [](const std::shared_ptr<Node> inCaller, std::list<std::pair<std::string, std::string> >&& inRequiredRelations, const std::shared_ptr<Node> inTarget, const std::string& inNewRelationName, const std::string& inTemplatedReason) -> ConditionsBlock  // NOLINT(performance-unnecessary-value-param)
 	{	
@@ -15,7 +15,7 @@ void declareCommands()
 		{
 			for(auto& [relationName, relationReason] : inRequiredRelations)
 			{
-				if(edge->getAttributes().contains(relationName))
+				if(edge->getAttributes().contains<std::string>(relationName))
 				{
 					if(const auto sourceNode = edge->getSourceNode(); !(sourceNode->getName() == inTarget->getName()))
 					{
@@ -40,7 +40,7 @@ void declareCommands()
 		{
 			assert(inCommandData.arguments.size() == 1);
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN(std::any_cast<std::string>(inCommandData.arguments[0]) + " murdered " + inCommandData.caller);
+			PRINTLN(inCast.at(std::any_cast<std::string>(inCommandData.arguments[0]))->getName() + " murdered " + inCast.at(inCommandData.caller)->getName());
 		},
 		[changeAffinityTowardTarget](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
@@ -66,7 +66,7 @@ void declareCommands()
 		{
 			assert(inCommandData.arguments.empty());			
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN(inCommandData.caller + " died");
+			PRINTLN(inCast.at(inCommandData.caller)->getName() + " died");
 		},
 		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
@@ -88,13 +88,15 @@ void declareCommands()
 	{
 		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData)
 		{
-			assert(inCommandData.arguments.size() == 4);			
+			assert(inCommandData.arguments.size() == 4);
+
+			const auto callerName = inCast.at(inCommandData.caller)->getName();
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN("People whom had the following relationship with " + inCommandData.caller + ":");
+			PRINTLN("People whom had the following relationship with " + callerName + ":");
 			const auto& edgeAttribute = std::any_cast<std::vector<std::any> >(inCommandData.arguments[0]);
 			assert(edgeAttribute.size() == 2);
 			PRINTLN("\t- " + std::any_cast<std::string>(edgeAttribute[0]) + " : " + std::any_cast<std::string>(edgeAttribute[1]));
-			PRINTLN("Now have the relationship \"" + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" with " + std::any_cast<std::string>(inCommandData.arguments[2]) + " because of " + std::any_cast<std::string>(inCommandData.arguments[3]));
+			PRINTLN("Now have the relationship \"" + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" with " + inCast.at(std::any_cast<std::string>(inCommandData.arguments[2]))->getName() + " because of " + std::any_cast<std::string>(inCommandData.arguments[3]) + callerName);
 		},
 		[changeAffinityTowardTarget](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
@@ -102,32 +104,6 @@ void declareCommands()
 			const auto& edgeAttribute = std::any_cast<std::vector<std::any> >(inCommandData.arguments[0]);
 			assert(edgeAttribute.size() == 2);
 			return changeAffinityTowardTarget(inCast.at(inCommandData.caller), {{std::any_cast<std::string>(edgeAttribute[0]), std::any_cast<std::string>(edgeAttribute[1])}}, inCast.at(std::any_cast<std::string>(inCommandData.arguments[2])), std::any_cast<std::string>(inCommandData.arguments[1]), std::any_cast<std::string>(inCommandData.arguments[3]));
-		}
-	});
-
-	/*******************************************************************************
-	 * Moves the player to location
-	 *
-	 * @caller ref player
-	 * @param ref location
-	 ******************************************************************************/
-	commandRegistry->registerCommand("move_player", new Command
-	{
-		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData)
-		{
-			assert(inCommandData.arguments.size() == 1);		
-			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN(inCommandData.caller + " moved to " + std::any_cast<std::string>(inCommandData.arguments[0]));
-		},
-		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
-		{
-			assert(inCommandData.arguments.size() == 1);
-			return
-			{
-				{},
-				{}
-
-			};
 		}
 	});
 
@@ -143,16 +119,21 @@ void declareCommands()
 		{
 			assert(inCommandData.arguments.size() == 1);		
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN(inCommandData.caller + " moved to " + std::any_cast<std::string>(inCommandData.arguments[0]) + "'s location");
+			PRINTLN(inCast.at(inCommandData.caller)->getName() + " moved to " + inCast.at(std::any_cast<std::string>(inCommandData.arguments[0]))->getName() + "'s location");
 		},
 		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 1);
+
+
+
 			return
 			{
 				{},
-				{}
-
+				{
+					{},
+				{EdgeCondition{inCast.at(inCommandData.caller), inCast.at(std::any_cast<std::string>(inCommandData.arguments[0]))->getTargetNodeFromOutgoingEdgeWithAttribute({"Lives", "N/A"}), {{"Currently_In", "N/A"}}}}
+				}
 			};
 		}
 	});
@@ -169,15 +150,23 @@ void declareCommands()
 		{
 			assert(inCommandData.arguments.size() == 1);			
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN(inCommandData.caller + " killed " + std::any_cast<std::string>(inCommandData.arguments[0]));
+			PRINTLN(inCast.at(inCommandData.caller)->getName() + " killed " + inCast.at(std::any_cast<std::string>(inCommandData.arguments[0]))->getName());
 		},
 		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 1);
+
+			const auto enemy = inCast.at(std::any_cast<std::string>(inCommandData.arguments[0]));
 			return
 			{
-				{},
-				{}
+				{
+					{NodeCondition{enemy, "number", "0", ComparisonType::Greater}},
+					{}
+				},
+				{
+					{NodeCondition{enemy, "number", "0", ComparisonType::Equal}},
+					{}
+				}
 
 			};
 		}
@@ -197,16 +186,26 @@ void declareCommands()
 		{
 			assert(inCommandData.arguments.size() == 3);
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN(inCommandData.caller + " is now owned by " + std::any_cast<std::string>(inCommandData.arguments[0]) + " and has status \""  + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" because of "  + std::any_cast<std::string>(inCommandData.arguments[2]));
+			PRINTLN(inCast.at(inCommandData.caller)->getName() + " is now owned by " + inCast.at(std::any_cast<std::string>(inCommandData.arguments[0]))->getName() + " and has status \""  + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" because of "  + std::any_cast<std::string>(inCommandData.arguments[2]));
 		},
 		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 3);
+
+			const auto& caller = inCast.at(inCommandData.caller);
+			const auto previousOwner = caller->getSourceNodeFromIncomingEdgeWithAttribute({"Owns", "N/A"});
+			const auto previousLocation = previousOwner->getTargetNodeFromOutgoingEdgeWithAttribute({"Lives", "N/A"});
+
 			return
 			{
-				{},
-				{}
-
+				{
+					{},
+					{EdgeCondition{caller, previousLocation, {{"Currently_In", "N/A"}}}}
+				},
+				{
+					{NodeCondition{caller, "status", std::any_cast<std::string>(inCommandData.arguments[1]), ComparisonType::Equal}},
+					{EdgeCondition{inCast.at(std::any_cast<std::string>(inCommandData.arguments[0])), caller, {{"Owns", std::any_cast<std::string>(inCommandData.arguments[2])}}}}
+				}
 			};
 		}
 	});
@@ -225,7 +224,7 @@ void declareCommands()
 		{
 			assert(inCommandData.arguments.size() == 3);
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN(inCommandData.caller + " now has \"" + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" relationship with " + std::any_cast<std::string>(inCommandData.arguments[0]) + " because of " + std::any_cast<std::string>(inCommandData.arguments[2]));
+			PRINTLN(inCast.at(inCommandData.caller)->getName() + " now has \"" + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" relationship with " + inCast.at(std::any_cast<std::string>(inCommandData.arguments[0]))->getName() + " because of " + std::any_cast<std::string>(inCommandData.arguments[2]));
 		},
 		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
@@ -233,7 +232,10 @@ void declareCommands()
 			return
 			{
 				{},
-				{}
+				{
+					{},
+					{EdgeCondition{inCast.at(inCommandData.caller), inCast.at(std::any_cast<std::string>(inCommandData.arguments[0])), {{std::any_cast<std::string>(inCommandData.arguments[1]), std::any_cast<std::string>(inCommandData.arguments[2])}}}}
+				}
 
 			};
 		}
@@ -252,7 +254,7 @@ void declareCommands()
 		{
 			assert(inCommandData.arguments.size() == 2);
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN(inCommandData.caller + "'s \"" + std::any_cast<std::string>(inCommandData.arguments[0]) + "\" attribute is now equal to " + std::any_cast<std::string>(inCommandData.arguments[1]));
+			PRINTLN(inCast.at(inCommandData.caller)->getName() + "'s \"" + std::any_cast<std::string>(inCommandData.arguments[0]) + "\" attribute is now equal to " + std::any_cast<std::string>(inCommandData.arguments[1]));
 		},
 		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
@@ -260,9 +262,11 @@ void declareCommands()
 			return
 			{
 				{},
-				{}
+				{
+					{NodeCondition{inCast.at(inCommandData.caller), std::any_cast<std::string>(inCommandData.arguments[0]), std::any_cast<std::string>(inCommandData.arguments[1]), ComparisonType::Equal}},
+					{}
+				}
 			};
 		}
 	});
-	//TODO Add proper implementation and conditions
 }

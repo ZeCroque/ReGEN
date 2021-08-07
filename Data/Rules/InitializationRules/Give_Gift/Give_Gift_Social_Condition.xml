@@ -19,7 +19,7 @@
   </nodes>
   <connections>
     <connection from="Invoker" to="Recipient">
-      <relation Friends="N/A"/>
+      <relation Allies="N/A"/>
     </connection>
   </connections>
 </graph>

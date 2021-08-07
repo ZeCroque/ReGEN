@@ -64,6 +64,34 @@ int Node::getIndex() const
 	return index;
 }
 
+std::shared_ptr<Node> Node::getSourceNodeFromIncomingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute)
+{
+	std::shared_ptr<Node> sourceNode;
+	for(const auto& incomingEdge : incomingEdges)
+	{
+		if(auto locationAttribute = incomingEdge->getAttributes().find<std::string>(inAttribute.first); locationAttribute != incomingEdge->getAttributes().end() && (inAttribute.second == "N/A" || locationAttribute->second == inAttribute.second))
+		{
+			sourceNode = incomingEdge->getSourceNode();
+			break;
+		}
+	}
+	return sourceNode;
+}
+
+std::shared_ptr<Node> Node::getTargetNodeFromOutgoingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute)
+{
+	std::shared_ptr<Node> targetNode;
+	for(const auto& outGoingEdge : outgoingEdges)
+	{
+		if(auto locationAttribute = outGoingEdge->getAttributes().find<std::string>(inAttribute.first); locationAttribute != outGoingEdge->getAttributes().end() && (inAttribute.second == "N/A" || locationAttribute->second == inAttribute.second))
+		{
+			targetNode = outGoingEdge->getTargetNode();
+			break;
+		}
+	}
+	return targetNode;
+}
+
 bool Node::isSubNode(const Node& inParentNode)
 {
 	return containsAttributes(inParentNode) && containsEdges(incomingEdges, inParentNode.incomingEdges) && containsEdges(outgoingEdges, inParentNode.outgoingEdges);
@@ -100,7 +128,7 @@ bool Node::containsEdges(const std::list<std::shared_ptr<Edge>>& inNodeEdges, co
 		{
 			if //If the edge we are looking at hasn't yet been set as a sub-edge in previous iteration
 			(
-				std::none_of(foundEdges.begin(), foundEdges.end(), [edge](const std::shared_ptr<Edge>& e)
+				std::ranges::none_of(foundEdges, [edge](const std::shared_ptr<Edge>& e)
 				{
 					return e.get() == edge.get();
 				})

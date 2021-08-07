@@ -71,12 +71,7 @@ void declareCommands()
 		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.empty());
-			return
-			{
-				{},
-				{}
-
-			};
+			return{};
 		}
 	});
 
@@ -84,7 +79,7 @@ void declareCommands()
 	 * Adds a new relation between people whom had the specified relationship with caller and target
 	 *
 	 * @caller ref entity
-	 * @param array<string> relationsToVictim
+	 * @param array<string> relationToVictim
 	 * @param string newRelationForTarget
 	 * @param ref target
 	 * @param str reason
@@ -95,22 +90,18 @@ void declareCommands()
 		{
 			assert(inCommandData.arguments.size() == 4);			
 			PRINTLN("Command: " + inCommandData.name);
-			PRINTLN("People whom had one of the following relationship with " + inCommandData.caller + ":");
-			for(auto& relationToVictim : std::any_cast<std::vector<std::any> >(inCommandData.arguments[0]))
-			{
-				PRINTLN("\t- " + std::any_cast<std::string>(relationToVictim));
-			}
+			PRINTLN("People whom had the following relationship with " + inCommandData.caller + ":");
+			const auto& edgeAttribute = std::any_cast<std::vector<std::any> >(inCommandData.arguments[0]);
+			assert(edgeAttribute.size() == 2);
+			PRINTLN("\t- " + std::any_cast<std::string>(edgeAttribute[0]) + " : " + std::any_cast<std::string>(edgeAttribute[1]));
 			PRINTLN("Now have the relationship \"" + std::any_cast<std::string>(inCommandData.arguments[1]) + "\" with " + std::any_cast<std::string>(inCommandData.arguments[2]) + " because of " + std::any_cast<std::string>(inCommandData.arguments[3]));
 		},
-		[](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
+		[changeAffinityTowardTarget](const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const CommandData& inCommandData) -> ConditionsBlock
 		{
 			assert(inCommandData.arguments.size() == 4);
-			return
-			{
-				{},
-				{}
-
-			};
+			const auto& edgeAttribute = std::any_cast<std::vector<std::any> >(inCommandData.arguments[0]);
+			assert(edgeAttribute.size() == 2);
+			return changeAffinityTowardTarget(inCast.at(inCommandData.caller), {{std::any_cast<std::string>(edgeAttribute[0]), std::any_cast<std::string>(edgeAttribute[1])}}, inCast.at(std::any_cast<std::string>(inCommandData.arguments[2])), std::any_cast<std::string>(inCommandData.arguments[1]), std::any_cast<std::string>(inCommandData.arguments[3]));
 		}
 	});
 

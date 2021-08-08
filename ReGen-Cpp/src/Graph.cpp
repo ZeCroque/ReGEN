@@ -7,11 +7,11 @@
 #include "Conditions.h"
 #include "Utils.h"
 
-Node::Node() : index(NONE)
+Node::Node() : bIsValid(true), index(NONE)
 {
 }
 
-Node::Node(std::string inName, std::unordered_map<std::string, NodeAttribute> inAttributes) : name(std::move(inName)), attributes(std::move(inAttributes)), index(NONE)
+Node::Node(std::string inName, std::unordered_map<std::string, NodeAttribute> inAttributes) : bIsValid(true), name(std::move(inName)), attributes(std::move(inAttributes)), index(NONE)
 {
 }
 
@@ -62,6 +62,11 @@ const std::list<std::shared_ptr<Edge>>& Node::getOutgoingEdges() const
 int Node::getIndex() const
 {
 	return index;
+}
+
+bool Node::isValid()
+{
+	return bIsValid;
 }
 
 void Node::clearEdges()
@@ -170,6 +175,29 @@ bool Node::containsEdges(const std::list<std::shared_ptr<Edge>>& inNodeEdges, co
 		}
 	}
 	return true; //Else they are
+}
+
+void Node::validateNode(Conditions preConditions, bool inValid)
+{
+	PRINTLN("Validating conditions for: " + name);
+	bIsValid = inValid && bIsValid;
+
+	if(preConditions.conflicts(conditionsBlock->postConditions))
+	{
+		PRINTLN("Invalid");
+#ifndef NDEBUG
+		preConditions.print();
+		conditionsBlock->postConditions.print();
+#endif
+		bIsValid = false;
+	}
+
+	preConditions.append(conditionsBlock->preConditions);
+
+	for(const auto& incomingEdge : incomingEdges)
+	{
+		incomingEdge->getSourceNode()->validateNode(preConditions, bIsValid);
+	}
 }
 
 Edge::Edge(std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode, std::unordered_map<std::string, std::string> inAttributes) : sourceNode(std::move(inSourceNode)), targetNode(std::move(inTargetNode)), attributes(std::move(inAttributes))

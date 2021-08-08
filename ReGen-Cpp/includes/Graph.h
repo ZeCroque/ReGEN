@@ -36,6 +36,7 @@ public:
 [[nodiscard]] const std::list<std::shared_ptr<Edge>>& getIncomingEdges() const;
 	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getOutgoingEdges() const;
 	[[nodiscard]] int getIndex() const;
+	[[nodiscard]] bool isValid();
 
 	void clearEdges();
 	std::shared_ptr<Node> getSourceNodeFromIncomingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute);
@@ -43,11 +44,13 @@ public:
 	bool isSubNode(const Node& inParentNode);
 	bool containsAttributes(const Node& inParentNode);
 	static bool containsEdges(const std::list<std::shared_ptr<Edge> >& inNodeEdges, const std::list<std::shared_ptr<Edge> >& inParentNodeEdges);
+	void validateNode(struct Conditions preConditions, bool inValid);
 
 private:	
 	std::string name;
 	std::unordered_map<std::string, NodeAttribute> attributes;
 	mutable std::shared_ptr<ConditionsBlock> conditionsBlock; //TODO complex template dev to prevent non-story graphs from having conditions
+	bool bIsValid; //TODO complex template dev to prevent non-story graphs from having validation
 
 	std::list<std::shared_ptr<Edge>> incomingEdges;
 	std::list<std::shared_ptr<Edge>> outgoingEdges;

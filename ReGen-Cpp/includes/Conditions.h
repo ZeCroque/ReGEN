@@ -17,64 +17,34 @@ struct NodeCondition
 	std::string attributeValue;
 	ComparisonType comparisonType;
 
+	[[nodiscard]] bool conflicts(const NodeCondition& inNodeCondition) const;
+	[[nodiscard]] bool compares(const NodeCondition& inNodeCondition) const;
+
 #ifndef NDEBUG
 	void print() const;
 #endif
 };
 
-#ifndef NDEBUG
-inline void NodeCondition::print() const
+class EdgeCondition : public Edge
 {
-	std::string comparisonString;
-	switch(comparisonType)
-	{
-		case ComparisonType::Equal:
-			comparisonString = "=";
-			break;
-		case ComparisonType::Greater:
-			comparisonString = ">";
-			break;
-		case ComparisonType::Lesser:
-			comparisonString = "<";
-			break;
-	}
-	PRINTLN(node->getName() + "_" + attributeName + "_" + comparisonString + "_" + attributeValue);
-}
-#endif
+public:
+	EdgeCondition(const std::shared_ptr<Node>& inSourceNode, const std::shared_ptr<Node>& inTargetNode, const std::unordered_map<std::string, std::string> & inAttributes);
 
-using EdgeCondition = Edge;
+	[[nodiscard]] bool conflicts(const EdgeCondition& inEdgeCondition) const;
+};
+
 struct Conditions
 {
 	std::list<NodeCondition> nodeConditions;
 	std::list<EdgeCondition> edgeConditions;
 
+	[[nodiscard]] bool conflicts(const Conditions& inCondition);
 	void append(Conditions& inConditions);
 
 #ifndef NDEBUG
 	void print() const;
 #endif
 };
-
-inline void Conditions::append(Conditions& inConditions)
-{
-	nodeConditions.splice(nodeConditions.end(), inConditions.nodeConditions);
-	edgeConditions.splice(edgeConditions.end(), inConditions.edgeConditions);
-}
-
-#ifndef NDEBUG
-inline void Conditions::print() const
-{
-	for(const auto& nodeCondition : nodeConditions)
-	{
-		nodeCondition.print();
-	}
-
-	for(const auto& edgeCondition : edgeConditions)
-	{
-		edgeCondition.print();
-	}
-}
-#endif
 
 struct ConditionsBlock
 {
@@ -86,22 +56,5 @@ struct ConditionsBlock
 	void print() const;
 #endif
 };
-
-inline void ConditionsBlock::append(ConditionsBlock&& inConditionsBlock)
-{
-	preConditions.append(inConditionsBlock.preConditions);
-	postConditions.append(inConditionsBlock.postConditions);
-}
-
-#ifndef NDEBUG
-inline void ConditionsBlock::print() const
-{
-	PRINTLN("PreConditions :");
-	preConditions.print();
-	PRINTLN("");
-	PRINTLN("PostConditions :");
-	postConditions.print();
-}
-#endif
 
 #endif // CONDITIONS_H

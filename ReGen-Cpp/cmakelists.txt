@@ -29,6 +29,7 @@ set(SOURCES
     ${SOURCE_DIR}/DataManager.cpp
     ${SOURCE_DIR}/Graph.cpp
     ${SOURCE_DIR}/Scheduler.cpp
+    ${SOURCE_DIR}/Conditions.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})

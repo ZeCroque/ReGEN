@@ -113,7 +113,7 @@ void Scheduler::run()
 	}
 
 #ifndef NDEBUG
-	const auto lastNode = (++resultStory.getNodesByIndex().begin())->second;
+	const auto lastNode = resultStory.getNodeByIndex(1);
 	printNodeConditions(lastNode->getName(), lastNode->getConditionsBlock());
 #endif
 
@@ -244,6 +244,11 @@ void Scheduler::run()
 						}
 						createNodeConditions(rewriteRuleNodeModificationArguments, cast, storyNode.get());
 					}
+#ifdef NDEBUG
+					auto lastNode = resultStory.getNodeByIndex(1);
+#endif
+					lastNode->validateNode({}, true);
+					PRINTLN("Story valid ? " + std::to_string(lastNode->isValid()));
 				}
 			}
 			++rewriteCount;

@@ -11,13 +11,6 @@
         <value>Branched_Node</value>
       </attr>
     </node>
-    <node modification="None" name="Spare">
-      <target>Recipient</target>
-      <nodetype>Sympathy</nodetype>
-      <attr name="Additional" type="str">
-        <value>Branched_Node</value>
-      </attr>
-    </node>
   </nodes>
   <connections>
     <connection from="Kill_Victim" to="Ambush_By_Lover">

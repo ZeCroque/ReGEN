@@ -1,7 +1,7 @@
 <graph name="Spare_Story_Condition" type="Story_Graph">
   <nodes>
     <node modification="None" name="Kill_Victim">
-      <target>Victim</target>
+      <target>Recipient</target>
       <nodetype>Murder</nodetype>
     </node>
   </nodes>

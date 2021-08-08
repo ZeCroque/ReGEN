@@ -37,6 +37,7 @@ public:
 	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getOutgoingEdges() const;
 	[[nodiscard]] int getIndex() const;
 
+	void clearEdges();
 	std::shared_ptr<Node> getSourceNodeFromIncomingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute);
 	std::shared_ptr<Node> getTargetNodeFromOutgoingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute);
 	bool isSubNode(const Node& inParentNode);
@@ -98,6 +99,9 @@ class Graph
 	void addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode);
 	void addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, int inSourceIndex, int inTargetIndex);
     void addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName);
+	void removeEdge(const std::shared_ptr<Edge> inEdge);
+	void removeEdge(int inSourceIndex, int inTargetIndex);
+	void removeEdge(const std::string& inSourceNodeName, const std::string& inTargetNodeName);
     void saveAsDotFile(const std::string& inColor = "ivory4", const std::string& inFontColor = "ivory4", const std::string& inOutputPath = "./Output", bool inLogAdjacencyMatrix = false) const;
 	void getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::list<std::shared_ptr<Node>>>& outFoundSubNodes) const;
 

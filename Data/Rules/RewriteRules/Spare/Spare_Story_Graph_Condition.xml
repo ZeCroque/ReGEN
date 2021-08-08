@@ -2,7 +2,7 @@
   <nodes>
     <node modification="None" name="Kill_Victim">
       <attr name="target" type="str">
-        <value>Victim</value>
+        <value>Recipient</value>
       </attr>
       <attr name="nodetype" type="str">
         <value>Murder</value>

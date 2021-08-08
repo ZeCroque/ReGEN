@@ -64,6 +64,12 @@ int Node::getIndex() const
 	return index;
 }
 
+void Node::clearEdges()
+{
+	incomingEdges.clear();
+	outgoingEdges.clear();
+}
+
 std::shared_ptr<Node> Node::getSourceNodeFromIncomingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute)
 {
 	std::shared_ptr<Node> sourceNode;
@@ -366,6 +372,30 @@ void Graph::addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, const
 void Graph::addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName)
 {
 	addEdge(inEdgeAttribute, nodesByName.at(inSourceNodeName), nodesByName.at(inTargetNodeName));
+}
+
+void Graph::removeEdge(const std::shared_ptr<Edge> inEdge)
+{
+	const auto sourceNode = inEdge->getSourceNode();
+	const auto targetNode = inEdge->getTargetNode();
+
+	adjacencyList.at(sourceNode->getIndex(), targetNode->getIndex()) = 0;
+	edgesByNodesIndex.erase({sourceNode->getIndex(), targetNode->getIndex()});
+	edgesByNodesNames.erase({sourceNode->getName(), targetNode->getName()});
+
+	const auto isSameEdgePredicate = [inEdge](const std::shared_ptr<Edge>& element){return element.get() == inEdge.get();};
+	sourceNode->outgoingEdges.remove_if(isSameEdgePredicate);
+	targetNode->incomingEdges.remove_if(isSameEdgePredicate);
+}
+
+void Graph::removeEdge(const int inSourceIndex, const int inTargetIndex)
+{
+	removeEdge(edgesByNodesIndex.at({inSourceIndex, inTargetIndex}));
+}
+
+void Graph::removeEdge(const std::string& inSourceNodeName, const std::string& inTargetNodeName)
+{
+	removeEdge(edgesByNodesNames.at({inSourceNodeName, inTargetNodeName}));
 }
 
 void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontColor, const std::string& inOutputPath, const bool inLogAdjacencyMatrix) const

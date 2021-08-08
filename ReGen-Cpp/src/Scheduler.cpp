@@ -20,7 +20,7 @@ void Scheduler::run()
 	
 	PRINTLN("Searching for Possible Narrative Rules...");
 	std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRules;
-	getPossibleRules(DataManager::getInstance()->getInitializationRules(), possibleRules);
+	getPossibleRules(DataManager::getInstance()->getInitializationRules(), graph, possibleRules);
 	PRINTLN(std::string("Found ") + std::to_string(possibleRules.size()) + " possible rules.");
 	if(possibleRules.empty())
 	{
@@ -141,23 +141,104 @@ void Scheduler::run()
 	resultStory.addEdge({"N/A", "N/A"}, 0, 2); //Between start node and first story node
 	resultStory.addEdge({"N/A", "N/A"}, resultStory.getNodeCount() - 1, 1);
 
-	//TODO rewrite rules
+	int rewriteCount = 0;
+	bool canRewrite = true;
+	while(canRewrite && rewriteCount < DataManager::getInstance()->getTestLayout().maxNumberOfRewrites)
+	{
+		std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRewriteRules;
+		getPossibleRules(DataManager::getInstance()->getRewriteRules(), resultStory, possibleRewriteRules);
+
+		if(!possibleRewriteRules.empty())
+		{
+			randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(possibleRewriteRules.size()) - 1};
+			targetIndex = randomIntDistribution(randomEngine);
+			count = 0;
+			std::pair<Rule, std::list<std::list<std::shared_ptr<Node> > > > randomRewriteRuleWithDataSets;
+			for(const auto& rule : possibleRewriteRules)
+			{
+				if(targetIndex == count)
+				{
+					randomRewriteRuleWithDataSets = rule;
+					break;
+				}
+				++count;
+			}
+
+			randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(randomRewriteRuleWithDataSets.second.size()) - 1};
+			targetIndex = randomIntDistribution(randomEngine);
+			count = 0;
+			std::list<std::shared_ptr<Node> > randomRewriteDataSets; //This is the node(s) that could be replaced by the rewrite rule
+			for(const auto& dataSet : randomRewriteRuleWithDataSets.second)
+			{
+				if(targetIndex == count)
+				{
+					randomRewriteDataSets = dataSet;
+					break;
+				}
+				++count;
+			}
+
+			auto& [rewriteRuleName, rewriteRuleSocialConditions, rewriteRuleStoryConditions, rewriteRuleStoryGraph, rewriteRuleNodeModificationArguments] = randomRewriteRuleWithDataSets.first;
+
+			bool isValid = false;
+			for(const auto& [socialNodeName, socialNode] : rewriteRuleSocialConditions.getNodesByName())
+			{
+				if(auto foundNode = cast.find<std::string>(socialNodeName); foundNode != cast.end())
+				{
+					socialNode->setAttribute("name", {"str", foundNode->second->getName()});
+					isValid = true;
+				}
+			}
+
+			if(isValid)
+			{
+				std::list<std::list<std::shared_ptr<Node> > > randomNodeDataSets;
+				graph.getIsomorphicSubGraphs(rewriteRuleSocialConditions, randomNodeDataSets);
+				if(!randomNodeDataSets.empty())
+				{
+					randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(randomNodeDataSets.size()) - 1};
+					targetIndex = randomIntDistribution(randomEngine);
+					count = 0;
+					std::list<std::shared_ptr<Node> > randomNodeDataSet; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
+					for(const auto& dataSet : randomNodeDataSets)
+					{
+						if(targetIndex == count)
+						{
+							randomNodeDataSet = dataSet;
+							break;
+						}
+						++count;
+					}
+
+					for(const auto& node : randomNodeDataSet)
+					{
+						//TODO add new NPCs to cast
+					}
+				}
+			}
+			++rewriteCount;
+		}
+		else
+		{
+			canRewrite = false;
+		}
+	}
 
 	resultStory.saveAsDotFile();
 }
 
-void Scheduler::getPossibleRules(const std::list<Rule>& inRuleSet, std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction>& outPossibleRules) const
+void Scheduler::getPossibleRules(const std::list<Rule>& inRuleSet, const Graph& inGraph, std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction>& outPossibleRules)
 {
 	for(const auto& rule : inRuleSet)
 	{
 		std::list<std::list<std::shared_ptr<Node> > > dataSet;
-		if( graph.getType() == "Social_Graph")
+		if(inGraph.getType() == "Social_Graph")
 		{
-			graph.getIsomorphicSubGraphs(rule.socialConditions, dataSet);
+			inGraph.getIsomorphicSubGraphs(rule.socialConditions, dataSet);
 		}
-		else if(graph.getType() == "Story_Graph") 
+		else if(inGraph.getType() == "Story_Graph") 
 		{
-			graph.getIsomorphicSubGraphs(rule.storyConditions, dataSet);
+			inGraph.getIsomorphicSubGraphs(rule.storyConditions, dataSet);
 		}
 		else
 		{

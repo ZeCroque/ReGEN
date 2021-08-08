@@ -104,7 +104,7 @@ bool Node::containsAttributes(const Node& inParentNode)
 		bool containsAttribute = false;
 		for(const auto& [attributeName, attributeData] : attributes)
 		{
-			if((parentAttributeName == "N/A" || parentAttributeName == attributeName) && (parentAttributeData.value == "N/A" || parentAttributeData.value == attributeData.value))
+			if(parentAttributeName == attributeName && (parentAttributeName == "target" || parentAttributeData.value == "N/A" || parentAttributeData.value == attributeData.value)) //TODO make virtual method for story nodes after template hell is done
 			{
 				containsAttribute = true;
 				break;
@@ -342,10 +342,9 @@ void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::sh
 		
 		const size_t sourceNodeIndex = inSourceNode->index;
 		const size_t targetNodeIndex = inTargetNode->index;
-
-		if(adjacencyList.size() <= sourceNodeIndex || adjacencyList.size() <= targetNodeIndex)
+		if(const auto size = std::max(sourceNodeIndex, targetNodeIndex) + 1; adjacencyList.n_rows <= size)
 		{
-			adjacencyList.resize(std::max(sourceNodeIndex, targetNodeIndex) + 1);
+			adjacencyList.resize(size, size);
 		}
 		
 		adjacencyList.at(sourceNodeIndex, targetNodeIndex) = 1;

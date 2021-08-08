@@ -13,7 +13,7 @@ public:
 	void run();
 
 private:
-	void getPossibleRules(const std::list<Rule>& inRuleSet, std::unordered_map<Rule, std::list<std::list<std::shared_ptr<class Node> > >, struct RuleHashFunction>& outPossibleRules) const;
+	static void getPossibleRules(const std::list<Rule>& inRuleSet, const Graph& inGraph, std::unordered_map<Rule, std::list<std::list<std::shared_ptr<class Node> > >, struct RuleHashFunction>& outPossibleRules);
 
 	std::default_random_engine randomEngine;
 	const Graph& graph;

@@ -36,7 +36,7 @@ public:
 [[nodiscard]] const std::list<std::shared_ptr<Edge>>& getIncomingEdges() const;
 	[[nodiscard]] const std::list<std::shared_ptr<Edge>>& getOutgoingEdges() const;
 	[[nodiscard]] int getIndex() const;
-	[[nodiscard]] bool isValid();
+	[[nodiscard]] bool isValid() const;
 
 	void clearEdges();
 	std::shared_ptr<Node> getSourceNodeFromIncomingEdgeWithAttribute(const std::pair<std::string, std::string>& inAttribute);
@@ -98,7 +98,7 @@ class Graph
 	
 	void loadFromXml(const pugi::xml_node& inParsedXml);
 	void loadFromXml(const std::string& inPath);
-	void addNode(Node* inNode);
+	std::shared_ptr<Node> addNode(Node* inNode);
 	void addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode);
 	void addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, int inSourceIndex, int inTargetIndex);
     void addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName);

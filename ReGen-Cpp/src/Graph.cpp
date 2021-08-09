@@ -11,7 +11,7 @@ Node::Node() : bIsValid(true), index(NONE)
 {
 }
 
-Node::Node(std::string inName, std::unordered_map<std::string, NodeAttribute> inAttributes) : bIsValid(true), name(std::move(inName)), attributes(std::move(inAttributes)), index(NONE)
+Node::Node(std::string inName, std::unordered_map<std::string, NodeAttribute> inAttributes) : name(std::move(inName)), attributes(std::move(inAttributes)), bIsValid(true), index(NONE)
 {
 }
 
@@ -64,7 +64,7 @@ int Node::getIndex() const
 	return index;
 }
 
-bool Node::isValid()
+bool Node::isValid() const
 {
 	return bIsValid;
 }
@@ -350,15 +350,21 @@ void Graph::loadFromXml(const pugi::xml_node& inParsedXml)
 	}
 }
 
-void Graph::addNode(Node* inNode)
+std::shared_ptr<Node> Graph::addNode(Node* inNode)
 {
 	inNode->index = nodeCount;
 	
-	const std::shared_ptr<Node> newNode(inNode);
+	std::shared_ptr<Node> newNode(inNode);
 	nodesByName.insert({inNode->name, newNode});
 	nodesByIndex.insert({nodeCount, newNode});
 
 	++nodeCount;
+	if(auto size = static_cast<size_t>(nodeCount); adjacencyList.n_rows < size)
+	{
+		adjacencyList.resize(size, size);
+	}
+
+	return newNode;
 }
 
 void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode)
@@ -376,11 +382,6 @@ void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::sh
 		
 		const size_t sourceNodeIndex = inSourceNode->index;
 		const size_t targetNodeIndex = inTargetNode->index;
-		if(const auto size = std::max(sourceNodeIndex, targetNodeIndex) + 1; adjacencyList.n_rows <= size)
-		{
-			adjacencyList.resize(size, size);
-		}
-		
 		adjacencyList.at(sourceNodeIndex, targetNodeIndex) = 1;
 		edgesByNodesIndex[{static_cast<int>(sourceNodeIndex), static_cast<int>(targetNodeIndex)}] = edge;
 
@@ -484,7 +485,7 @@ void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontC
 		}
 		file << "}";
 		file.close();
-		system(("dot -Tpng " + dotFilePath + " -o " + fullPathWithoutExtension + ".png").c_str());
+		system(("dot -Tpng " + dotFilePath + " -o " + fullPathWithoutExtension + ".png").c_str()); //TODO move outside to enable multi-threading
 		return;
 	}
 	assert(false);
@@ -589,8 +590,11 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 			isomorphNodes.push_back(foundSubNodes);
 		}
 	}
+
+	//Ensure returned combinations are correct (due to the cartisian product done earlier, some of them don't answer the direction and label of edges
 	for(auto& subNodes : isomorphNodes)
 	{
+		//First we check all nodes two by two
 		bool isCorrect = true;
 		auto subNode = subNodes.begin();
 		for(auto i = 0; i < static_cast<int>(subNodes.size()) - 1; ++i)
@@ -619,6 +623,7 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 			}
 		}
 
+		//Then we check the first one with the last one
 		if(isCorrect && inSearchedGraph.nodeCount > 1)
 		{
 			const auto lastNode = --subNodes.end();

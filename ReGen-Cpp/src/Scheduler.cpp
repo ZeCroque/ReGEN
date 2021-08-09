@@ -6,9 +6,17 @@
 #include "Conditions.h"
 
 std::default_random_engine Scheduler::randomEngine(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
+std::unordered_map<std::string, int> Scheduler::rulesUsages;  // NOLINT(clang-diagnostic-exit-time-destructors)
 
 Scheduler::Scheduler(std::string inQuestName) : questName(std::move(inQuestName))
 {
+	if(rulesUsages.empty())
+	{
+		for(const auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments, appliesOnce] : DataManager::getInstance()->getInitializationRules())
+		{
+			rulesUsages[name] = 0;
+		}
+	}
 }
 
 void Scheduler::run()
@@ -22,7 +30,7 @@ void Scheduler::run()
 	
 	PRINTLN("Searching for Possible Narrative Rules...");
 	std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRules;
-	getPossibleRules(DataManager::getInstance()->getInitializationRules(), DataManager::getInstance()->getWorldGraph(), possibleRules);
+	getPossibleRules(DataManager::getInstance()->getInitializationRules(), DataManager::getInstance()->getWorldGraph(), rulesUsages, possibleRules);
 	PRINTLN(std::string("Found ") + std::to_string(possibleRules.size()) + " possible rules.");
 	if(possibleRules.empty())
 	{
@@ -47,10 +55,10 @@ void Scheduler::run()
 		++count;
 		PRINTLN("\t" + rule.first.name);
 	}
-	PRINTLN("Randomly picked the " + randomRuleWithDataSets.first.name + " rule.");
+	auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments, appliesOnce] = randomRuleWithDataSets.first;
+	PRINTLN("Randomly picked the " + name + " rule.");
+	++rulesUsages[name];
 
-	auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] = randomRuleWithDataSets.first;
-	
 	randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(randomRuleWithDataSets.second.size()) - 1};
 	targetIndex = randomIntDistribution(randomEngine);
 	count = 0;
@@ -127,53 +135,70 @@ void Scheduler::run()
 	resultStory.addEdge({"N/A", "N/A"}, 0, 2); //Between start node and first story node
 	resultStory.addEdge({"N/A", "N/A"}, resultStory.getNodeCount() - 1, 1);
 
-	Graph finalStory;
-	rewriteStory(resultStory, cast, finalStory);
+	std::unordered_map<std::string, int> rewriteRulesUsages;
+	for(const auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments, appliesOnce] : DataManager::getInstance()->getRewriteRules())
+	{
+		rewriteRulesUsages[name] = 0;
+	}
+
+	bool canRewrite = true;
+	int rewriteCount = 0;
+	Graph& finalStory = resultStory;
+	Graph tempStory;
+	while(canRewrite && rewriteCount < DataManager::getInstance()->getTestLayout().maxNumberOfRewrites)
+	{
+		canRewrite = rewriteStory(finalStory, cast, rewriteRulesUsages, tempStory);
+		finalStory = tempStory;
+		++rewriteCount;
+	}
+	PRINTLN("Stopped rewriting: " + std::string(canRewrite ? "Max rewrite count reached." : "No rewrite rules available."));
+
 	finalStory.saveAsDotFile();
 }
 
-void Scheduler::getPossibleRules(const std::list<Rule>& inRuleSet, const Graph& inGraph, std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction>& outPossibleRules)
+void Scheduler::getPossibleRules(const std::list<Rule>& inRuleSet, const Graph& inGraph, const std::unordered_map<std::string, int>& inRuleUsages, std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction>& outPossibleRules)
 {
 	for(const auto& rule : inRuleSet)
 	{
-		std::list<std::list<std::shared_ptr<Node> > > dataSet;
-		if(inGraph.getType() == "Social_Graph")
+
+		if(!rule.appliesOnce || !inRuleUsages.at(rule.name))
 		{
-			inGraph.getIsomorphicSubGraphs(rule.socialConditions, dataSet);
-		}
-		else if(inGraph.getType() == "Story_Graph") 
-		{
-			inGraph.getIsomorphicSubGraphs(rule.storyConditions, dataSet);
-		}
-		else
-		{
-			assert(false);
-		}
-		if(!dataSet.empty())
-		{
-			outPossibleRules[rule] = dataSet;
+			std::list<std::list<std::shared_ptr<Node> > > dataSet;
+			if(inGraph.getType() == "Social_Graph")
+			{
+				inGraph.getIsomorphicSubGraphs(rule.socialConditions, dataSet);
+			}
+			else if(inGraph.getType() == "Story_Graph") 
+			{
+				inGraph.getIsomorphicSubGraphs(rule.storyConditions, dataSet);
+			}
+			else
+			{
+				assert(false);
+			}
+			if(!dataSet.empty())
+			{
+				outPossibleRules[rule] = dataSet;
+			}
 		}
 	}
 }
 
-void Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std::string, std::shared_ptr<Node>>& inCast, Graph& outStory, int inRewritesCount)
+bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std::string, std::shared_ptr<Node>>& inCast, std::unordered_map<std::string, int>& inRuleUsages, Graph& outStory)
 {
-	if(inRewritesCount == DataManager::getInstance()->getTestLayout().maxNumberOfRewrites)
-	{
-		return;
-	}
-
+	PRINTLN("");
+	PRINTLN("Attempting to rewrite");
+	PRINT_SEPARATOR();
+	PRINTLN("Checking rewrite rules...");
 	Graph tempStory(inStory);
 	std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRewriteRules;
-	getPossibleRules(DataManager::getInstance()->getRewriteRules(), tempStory, possibleRewriteRules);
+	getPossibleRules(DataManager::getInstance()->getRewriteRules(), tempStory, inRuleUsages, possibleRewriteRules);
 	if(possibleRewriteRules.empty())
 	{
-		return;
+		return false;
 	}
 
-	bool castChanged = false;
-	auto tempCast(inCast);
-
+	PRINTLN("Found " + std::to_string(possibleRewriteRules.size()) + " possible rewrite rules.");
 	std::uniform_int_distribution randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(possibleRewriteRules.size()) - 1};
 	int targetIndex = randomIntDistribution(randomEngine);
 	int count = 0;
@@ -202,114 +227,117 @@ void Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 		++count;
 	}
 
-	auto& [rewriteRuleName, rewriteRuleSocialConditions, rewriteRuleStoryConditions, rewriteRuleStoryGraph, rewriteRuleNodeModificationArguments] = rewriteRuleWithDataSets.first;
-
-	bool isValid = false;
+	auto& [rewriteRuleName, rewriteRuleSocialConditions, rewriteRuleStoryConditions, rewriteRuleStoryGraph, rewriteRuleNodeModificationArguments, rewriteRuleAppliesOnce] = rewriteRuleWithDataSets.first;
+	PRINTLN("Picked the " + rewriteRuleName + " rewrite rule.");
+	++inRuleUsages[rewriteRuleName];
+	
 	for(const auto& [socialNodeName, socialNode] : rewriteRuleSocialConditions.getNodesByName())
 	{
 		if(auto foundNode = inCast.find<std::string>(socialNodeName); foundNode != inCast.end())
 		{
 			socialNode->setAttribute("name", {"str", foundNode->second->getName()});
-			isValid = true;
 		}
 	}
+
 
 	bool storyRewritten = false;
-	if(isValid)
+	std::list<std::list<std::shared_ptr<Node> > > possibleRewriteRuleCasts;
+	DataManager::getInstance()->getWorldGraph().getIsomorphicSubGraphs(rewriteRuleSocialConditions, possibleRewriteRuleCasts);
+	if(!possibleRewriteRuleCasts.empty())
 	{
-		std::list<std::list<std::shared_ptr<Node> > > possibleRewriteRuleCasts;
-		DataManager::getInstance()->getWorldGraph().getIsomorphicSubGraphs(rewriteRuleSocialConditions, possibleRewriteRuleCasts);
-		if(!possibleRewriteRuleCasts.empty())
+		randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(possibleRewriteRuleCasts.size()) - 1};
+		targetIndex = randomIntDistribution(randomEngine);
+		count = 0;
+		std::list<std::shared_ptr<Node> > rewriteRuleCast; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
+		for(const auto& dataSet : possibleRewriteRuleCasts)
 		{
-			randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(possibleRewriteRuleCasts.size()) - 1};
-			targetIndex = randomIntDistribution(randomEngine);
-			count = 0;
-			std::list<std::shared_ptr<Node> > rewriteRuleCast; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
-			for(const auto& dataSet : possibleRewriteRuleCasts)
+			if(targetIndex == count)
 			{
-				if(targetIndex == count)
-				{
-					rewriteRuleCast = dataSet;
-					break;
-				}
-				++count;
+				rewriteRuleCast = dataSet;
+				break;
 			}
-
-
-			count = 0;
-			for(const auto& node : rewriteRuleCast)
-			{
-				const auto socialNodeName = rewriteRuleSocialConditions.getNodeByIndex(count)->getName();
-				if(auto foundActor = tempCast.find<std::string>(rewriteRuleSocialConditions.getNodeByIndex(count)->getName()); foundActor == tempCast.end())
-				{
-					tempCast[socialNodeName] = node;
-					castChanged = true;
-				}
-				++count;
-			}
-
-			const auto rewriteStartNode = *rewriteRuleDataSet.begin();
-			const auto rewriteEndNode = *--rewriteRuleDataSet.end();
-
-			std::list<std::shared_ptr<Node> > nodesPreviouslyConnectedToRewriteStartNode;
-			std::list<std::shared_ptr<Node> > nodesPreviouslyConnectedToRewriteEndNode;
-
-			while(!rewriteStartNode->getIncomingEdges().empty())
-			{
-				auto incomingEdge = *rewriteStartNode->getIncomingEdges().begin();
-				nodesPreviouslyConnectedToRewriteStartNode.emplace_back(incomingEdge->getSourceNode());
-				tempStory.removeEdge(incomingEdge);
-			}
-			while(!rewriteEndNode->getOutgoingEdges().empty())
-			{
-				auto outgoingEdge = *rewriteEndNode->getOutgoingEdges().begin();
-				nodesPreviouslyConnectedToRewriteEndNode.emplace_back(outgoingEdge->getTargetNode());
-				tempStory.removeEdge(outgoingEdge);
-			}
-			tempStory.removeNode(rewriteStartNode);
-			tempStory.removeNode(rewriteEndNode);
-
-			for(auto [storyNodeIndex, storyNode] : rewriteRuleStoryGraph.getNodesByIndex())
-			{
-				auto generatedNode = tempStory.addNode(new Node(*storyNode));
-				generatedNode->setAttribute("target", {"str", tempCast[storyNode->getAttribute("target").value]->getName()});
-				generatedNode->clearEdges();
-				if(storyNode->getIncomingEdges().empty())
-				{
-					for(const auto& nodePreviouslyConnectedToRewriteStartNode : nodesPreviouslyConnectedToRewriteStartNode)
-					{
-						tempStory.addEdge({"N/A", "N/A"}, nodePreviouslyConnectedToRewriteStartNode, generatedNode);
-					}
-				}
-				if(storyNode->getOutgoingEdges().empty())
-				{
-					for(const auto& nodePreviouslyConnectedToRewriteEndNode : nodesPreviouslyConnectedToRewriteEndNode)
-					{
-						tempStory.addEdge({"N/A", "N/A"}, generatedNode, nodePreviouslyConnectedToRewriteEndNode);
-					}
-				}
-				createNodeConditions(rewriteRuleNodeModificationArguments, tempCast, generatedNode);
-			}
-
-			for(const auto& [storyEdgeNames, storyEdge] : rewriteRuleStoryGraph.getEdgesByNodesNames())
-			{
-				tempStory.addEdge({"N/A", "N/A"}, storyEdgeNames.first, storyEdgeNames.second);
-			}
-
-			auto lastNode = tempStory.getNodeByIndex(1);
-			lastNode->validateNode({}, true);
-			storyRewritten = lastNode->isValid();
-			PRINTLN("Story valid ? " + std::to_string(storyRewritten));
-			
+			++count;
 		}
+
+		count = 0;
+		auto tempCast(inCast);
+		for(const auto& node : rewriteRuleCast)
+		{
+			const auto socialNodeName = rewriteRuleSocialConditions.getNodeByIndex(count)->getName();
+			if(auto foundActor = tempCast.find<std::string>(rewriteRuleSocialConditions.getNodeByIndex(count)->getName()); foundActor == tempCast.end())
+			{
+				tempCast[socialNodeName] = node;
+			}
+			++count;
+		}
+
+		const auto rewriteStartNode = *rewriteRuleDataSet.begin();
+		const auto rewriteEndNode = *--rewriteRuleDataSet.end();
+
+		std::list<std::shared_ptr<Node> > nodesPreviouslyConnectedToRewriteStartNode;
+		std::list<std::shared_ptr<Node> > nodesPreviouslyConnectedToRewriteEndNode;
+
+		while(!rewriteStartNode->getIncomingEdges().empty())
+		{
+			auto incomingEdge = *rewriteStartNode->getIncomingEdges().begin();
+			nodesPreviouslyConnectedToRewriteStartNode.emplace_back(incomingEdge->getSourceNode());
+			tempStory.removeEdge(incomingEdge);
+		}
+		while(!rewriteEndNode->getOutgoingEdges().empty())
+		{
+			auto outgoingEdge = *rewriteEndNode->getOutgoingEdges().begin();
+			nodesPreviouslyConnectedToRewriteEndNode.emplace_back(outgoingEdge->getTargetNode());
+			tempStory.removeEdge(outgoingEdge);
+		}
+		tempStory.removeNode(rewriteStartNode);
+		tempStory.removeNode(rewriteEndNode);
+
+		for(auto [storyNodeName, storyNode] : rewriteRuleStoryGraph.getNodesByName())
+		{
+			auto* generatedNode = new Node(*storyNode);
+			while(tempStory.getNodesByName().contains<std::string>(generatedNode->getName()))
+			{
+				generatedNode->setName(generatedNode->getName() + "_");
+			}
+
+			auto addedNode = tempStory.addNode(generatedNode);
+			addedNode->setAttribute("target", {"str", tempCast[storyNode->getAttribute("target").value]->getName()});
+			addedNode->clearEdges();
+			if(storyNode->getIncomingEdges().empty())
+			{
+				for(const auto& nodePreviouslyConnectedToRewriteStartNode : nodesPreviouslyConnectedToRewriteStartNode)
+				{
+					tempStory.addEdge({"N/A", "N/A"}, nodePreviouslyConnectedToRewriteStartNode, addedNode);
+				}
+			}
+			if(storyNode->getOutgoingEdges().empty())
+			{
+				for(const auto& nodePreviouslyConnectedToRewriteEndNode : nodesPreviouslyConnectedToRewriteEndNode)
+				{
+					tempStory.addEdge({"N/A", "N/A"}, addedNode, nodePreviouslyConnectedToRewriteEndNode);
+				}
+			}
+			createNodeConditions(rewriteRuleNodeModificationArguments, tempCast, addedNode);
+		}
+
+
+		for(const auto& [storyEdgeNames, storyEdge] : rewriteRuleStoryGraph.getEdgesByNodesNames())
+		{
+			tempStory.addEdge({"N/A", "N/A"}, storyEdgeNames.first, storyEdgeNames.second);
+		}
+
+		auto lastNode = tempStory.getNodeByIndex(1);
+		lastNode->validateNode({}, true);
+		storyRewritten = lastNode->isValid();
+		PRINTLN("Story valid ? " + std::to_string(storyRewritten));
+
 	}
-	Graph story;
 	outStory = storyRewritten ? tempStory : inStory;
-	rewriteStory(outStory, castChanged ? tempCast : inCast, story, ++inRewritesCount);
+	return true;
 }
 
 #ifndef NDEBUG
-void Scheduler::printNodeConditions(const std::string& inNodeName, std::shared_ptr<ConditionsBlock> inConditionsBlock)
+void Scheduler::printNodeConditions(const std::string& inNodeName, const std::shared_ptr<ConditionsBlock> inConditionsBlock)  // NOLINT(performance-unnecessary-value-param)
 {
 	PRINTLN("");
 	PRINT_SEPARATOR();
@@ -319,7 +347,7 @@ void Scheduler::printNodeConditions(const std::string& inNodeName, std::shared_p
 }
 #endif
 
-void Scheduler::createNodeConditions(const std::unordered_map<std::string, std::list<CommandData> >& inRuleCommandsData, const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, std::shared_ptr<Node> inNode)
+void Scheduler::createNodeConditions(const std::unordered_map<std::string, std::list<CommandData> >& inRuleCommandsData, const std::unordered_map<std::string, std::shared_ptr<Node> >& inCast, const std::shared_ptr<Node> inNode)  // NOLINT(performance-unnecessary-value-param)
 {
 	ConditionsBlock conditionsBlock;
 	if(const auto& commandsData = inRuleCommandsData.find<std::string>(inNode->getName()); commandsData != inRuleCommandsData.end())

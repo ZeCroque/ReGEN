@@ -20,6 +20,12 @@ const std::string& Node::getName() const
 	return name;
 }
 
+void Node::setName(const std::string& inName)
+{
+	name = inName;
+	//TODO change key in nodesByName map and in edgesByNodeNames, not already done because it is atm only used on not yet added nodes
+}
+
 const std::unordered_map<std::string, NodeAttribute>& Node::getAttributes() const
 {
 	return attributes;
@@ -358,11 +364,11 @@ std::shared_ptr<Node> Graph::addNode(Node* inNode)
 	inNode->index = nodeCount;
 	
 	std::shared_ptr<Node> newNode(inNode);
-	nodesByName.insert({inNode->name, newNode});
-	nodesByIndex.insert({nodeCount, newNode});
+	nodesByName[inNode->name] = newNode;
+	nodesByIndex[nodeCount] = newNode;
 
 	++nodeCount;
-	if(auto size = static_cast<size_t>(nodeCount); adjacencyList.n_rows < size)
+	if(const auto size = static_cast<size_t>(nodeCount); adjacencyList.n_rows < size)
 	{
 		adjacencyList.resize(size, size);
 	}
@@ -372,6 +378,8 @@ std::shared_ptr<Node> Graph::addNode(Node* inNode)
 
 void Graph::removeNode(const std::shared_ptr<Node> inNodeToRemove) const
 {
+	nodesByName.erase(inNodeToRemove->getName());
+
 	if(nodesByIndex.contains(inNodeToRemove->getIndex()))
 	{
 		nodesByIndex[inNodeToRemove->getIndex()].reset();

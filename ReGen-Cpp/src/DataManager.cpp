@@ -117,7 +117,7 @@ void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool i
 		
 		char i = '0';
 		baseOutputPath = "./Output/InitRules/";
-		for(const auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] : initializationRules)
+		for(const auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments, appliesOnce] : initializationRules)
 		{
 			auto outputPath(baseOutputPath);
 			outputPath.push_back(i);
@@ -129,7 +129,7 @@ void DataManager::saveDataAsDotFormat(const bool inPrintWorldGraph, const bool i
 
 		i = '0';
 		baseOutputPath = "./Output/RewriteRules/";
-		for(const auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments] : rewriteRules)
+		for(const auto& [name, socialConditions, storyConditions, storyGraph, nodeModificationArguments, appliesOnce] : rewriteRules)
 		{
 			auto outputPath(baseOutputPath);
 			outputPath.push_back(i);
@@ -195,7 +195,14 @@ void DataManager::loadRules(const std::string& inRulesPath, const pugi::xml_node
 
 		const auto ruleFolderPath = inRulesPath + rule.name + "/";
 		const auto rulePathExtensionless = ruleFolderPath + ruleName.text().as_string();
-		auto filePath = rulePathExtensionless + "_Social_Condition" + FILE_EXTENSION; 
+
+		auto filePath = rulePathExtensionless + FILE_EXTENSION;
+		assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
+		pugi::xml_document ruleAttributes;
+		ruleAttributes.load_file(filePath.c_str());
+		rule.appliesOnce = ruleAttributes.document_element().attribute("applyonce").as_bool();
+
+		filePath = rulePathExtensionless + "_Social_Condition" + FILE_EXTENSION; 
 		assert(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath));
 		rule.socialConditions.loadFromXml(filePath);
 

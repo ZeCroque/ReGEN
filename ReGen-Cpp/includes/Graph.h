@@ -28,6 +28,7 @@ public:
 	Node(std::string inName, std::unordered_map<std::string, NodeAttribute> inAttributes);
 	
 	[[nodiscard]] const std::string& getName() const;
+	void setName(const std::string& inName);
 	[[nodiscard]] const std::unordered_map<std::string, NodeAttribute>& getAttributes() const;
 	[[nodiscard]] const NodeAttribute& getAttribute(const std::string& inAttributeName) const;
 	void setAttribute(const std::string& inAttributeName, const NodeAttribute& inAttributeValue);

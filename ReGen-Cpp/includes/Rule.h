@@ -13,6 +13,7 @@ struct Rule
 	Graph storyConditions;
 	Graph storyGraph;
 	std::unordered_map<std::string, std::list<CommandData> > nodeModificationArguments;
+	bool appliesOnce;
 };
 
 inline bool operator==(const Rule& inFirstRule, const Rule& inSecondRule)

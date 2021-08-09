@@ -7,7 +7,7 @@
 
 std::default_random_engine Scheduler::randomEngine(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 
-Scheduler::Scheduler(const Graph& inGraph) : graph(inGraph)
+Scheduler::Scheduler(std::string inQuestName) : questName(std::move(inQuestName))
 {
 }
 
@@ -16,13 +16,13 @@ void Scheduler::run()
 	PRINTLN("Creating initial narrative");
 	PRINT_SEPARATOR();
 
-	Graph resultStory("New_Quest", "Story_Graph");
+	Graph resultStory(questName, "Story_Graph");
 	resultStory.addNode(new Node("Start_Quest", {{"Node_Type", {"str", "Start"}}}));
 	resultStory.addNode(new Node("End_Quest", {{"Node_Type", {"str", "End"}}}));
 	
 	PRINTLN("Searching for Possible Narrative Rules...");
 	std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRules;
-	getPossibleRules(DataManager::getInstance()->getInitializationRules(), graph, possibleRules);
+	getPossibleRules(DataManager::getInstance()->getInitializationRules(), DataManager::getInstance()->getWorldGraph(), possibleRules);
 	PRINTLN(std::string("Found ") + std::to_string(possibleRules.size()) + " possible rules.");
 	if(possibleRules.empty())
 	{
@@ -214,6 +214,7 @@ void Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 		}
 	}
 
+	bool storyRewritten = false;
 	if(isValid)
 	{
 		std::list<std::list<std::shared_ptr<Node> > > possibleRewriteRuleCasts;
@@ -265,13 +266,14 @@ void Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 				nodesPreviouslyConnectedToRewriteEndNode.emplace_back(outgoingEdge->getTargetNode());
 				tempStory.removeEdge(outgoingEdge);
 			}
-			//TODO remove node
+			tempStory.removeNode(rewriteStartNode);
+			tempStory.removeNode(rewriteEndNode);
 
 			for(auto [storyNodeIndex, storyNode] : rewriteRuleStoryGraph.getNodesByIndex())
 			{
 				auto generatedNode = tempStory.addNode(new Node(*storyNode));
 				generatedNode->setAttribute("target", {"str", tempCast[storyNode->getAttribute("target").value]->getName()});
-				
+				generatedNode->clearEdges();
 				if(storyNode->getIncomingEdges().empty())
 				{
 					for(const auto& nodePreviouslyConnectedToRewriteStartNode : nodesPreviouslyConnectedToRewriteStartNode)
@@ -289,13 +291,20 @@ void Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 				createNodeConditions(rewriteRuleNodeModificationArguments, tempCast, generatedNode);
 			}
 
+			for(const auto& [storyEdgeNames, storyEdge] : rewriteRuleStoryGraph.getEdgesByNodesNames())
+			{
+				tempStory.addEdge({"N/A", "N/A"}, storyEdgeNames.first, storyEdgeNames.second);
+			}
+
 			auto lastNode = tempStory.getNodeByIndex(1);
 			lastNode->validateNode({}, true);
-			PRINTLN("Story valid ? " + std::to_string(lastNode->isValid()));
-			outStory = lastNode->isValid() ? tempStory : inStory;
+			storyRewritten = lastNode->isValid();
+			PRINTLN("Story valid ? " + std::to_string(storyRewritten));
+			
 		}
 	}
 	Graph story;
+	outStory = storyRewritten ? tempStory : inStory;
 	rewriteStory(outStory, castChanged ? tempCast : inCast, story, ++inRewritesCount);
 }
 

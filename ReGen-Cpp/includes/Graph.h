@@ -59,7 +59,7 @@ private:
 
 class Edge
 {
-	friend class Graph; //TODO setters?
+	friend class Graph;
 
 public:
 	Edge() = default;
@@ -99,6 +99,7 @@ class Graph
 	void loadFromXml(const pugi::xml_node& inParsedXml);
 	void loadFromXml(const std::string& inPath);
 	std::shared_ptr<Node> addNode(Node* inNode);
+	void removeNode(std::shared_ptr<Node> inNodeToRemove) const;
 	void addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode);
 	void addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, int inSourceIndex, int inTargetIndex);
     void addEdge(std::pair<std::string, std::string>&& inEdgeAttribute, const std::string& inSourceNodeName, const std::string& inTargetNodeName);

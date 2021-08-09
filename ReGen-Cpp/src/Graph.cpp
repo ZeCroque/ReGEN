@@ -367,6 +367,14 @@ std::shared_ptr<Node> Graph::addNode(Node* inNode)
 	return newNode;
 }
 
+void Graph::removeNode(const std::shared_ptr<Node> inNodeToRemove) const
+{
+	if(nodesByIndex.contains(inNodeToRemove->getIndex()))
+	{
+		nodesByIndex[inNodeToRemove->getIndex()].reset();
+	}
+}
+
 void Graph::addEdge(std::pair<std::string, std::string> inEdgeAttribute, std::shared_ptr<Node> inSourceNode, std::shared_ptr<Node> inTargetNode)
 {
 	assert(inSourceNode.get() != inTargetNode.get());
@@ -500,7 +508,7 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 	{
 		for(int col = 0; col < nodeCount; ++col)
 		{
-			if(const auto node = nodesByIndex.at(col), subNode = inSearchedGraph.nodesByIndex.at(row); node->incomingEdges.size() >= subNode->incomingEdges.size()
+			if(const auto node = nodesByIndex.at(col), subNode = inSearchedGraph.nodesByIndex.at(row); node && subNode && node->incomingEdges.size() >= subNode->incomingEdges.size()
 				&& node->outgoingEdges.size() >= subNode->outgoingEdges.size()
 				&& node->isSubNode(*subNode))
 			{

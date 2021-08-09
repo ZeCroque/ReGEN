@@ -182,17 +182,20 @@ void Node::validateNode(Conditions preConditions, bool inValid)
 	PRINTLN("Validating conditions for: " + name);
 	bIsValid = inValid && bIsValid;
 
-	if(preConditions.conflicts(conditionsBlock->postConditions))
+	if(conditionsBlock)
 	{
-		PRINTLN("Invalid");
+		if(preConditions.conflicts(conditionsBlock->postConditions))
+		{
+			PRINTLN("Invalid");
 #ifndef NDEBUG
-		preConditions.print();
-		conditionsBlock->postConditions.print();
+			preConditions.print();
+			conditionsBlock->postConditions.print();
 #endif
-		bIsValid = false;
-	}
+			bIsValid = false;
+		}
 
-	preConditions.append(conditionsBlock->preConditions);
+		preConditions.append(conditionsBlock->preConditions);
+	}
 
 	for(const auto& incomingEdge : incomingEdges)
 	{

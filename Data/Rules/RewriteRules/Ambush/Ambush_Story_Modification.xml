@@ -6,7 +6,7 @@
     </node>
     <node modification="Ambush_By_Lover_Modification.xml" name="Ambush_By_Lover">
       <target>Lover</target>
-      <nodetype>Murder</nodetype>
+      <nodetype>Ambush</nodetype>
       <attr name="Additional" type="str">
         <value>Branched_Node</value>
       </attr>

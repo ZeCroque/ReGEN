@@ -161,7 +161,7 @@ class SocialGraph(Graph):
 					print "Modification Error"
 
 	def make_node_postconditions(self, story):
-		self.update_cast(story)
+		#self.update_cast(story)
 		for node in story.get_nodes():
 			self.make_postcondition(node, story)	
 	

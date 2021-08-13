@@ -228,7 +228,7 @@ class Scheduler:
 								
 		narrative.replace_node_with_new(narrative.get_node_from_name(resulting_story_nodes[0].get_name()), new_graph)
 
-		narrative.fix_graph()
+		#narrative.fix_graph()
 		self._social_graph.make_node_postconditions(narrative)
 		narrative.initialize_conditions()
 		

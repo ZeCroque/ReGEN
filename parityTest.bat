@@ -4,8 +4,8 @@ set "pythonPath=%pythonPath:/=\%"
 set "cppPath=%2"
 set "cppPath=%cppPath:/=\%"
 
-rem cd /D %pythonPath%
-rem python %pythonPath%/ReGEN-Python/Main.py
+cd /D %pythonPath%
+python %pythonPath%/ReGEN-Python/Main.py
 
 cd /D %cppPath%/
 START /WAIT./Release/ReGen-Cpp.exe

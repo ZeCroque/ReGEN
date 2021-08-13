@@ -191,140 +191,139 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 	Graph tempStory(inStory);
 	std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRewriteRules;
 	getPossibleRules(DataManager::getInstance()->getRewriteRules(), tempStory, inRuleUsages, possibleRewriteRules);
-	if(possibleRewriteRules.empty())
-	{
-		return false;
-	}
-
-	PRINTLN("Found " + std::to_string(possibleRewriteRules.size()) + " possible rewrite rules.");
-	int targetIndex = randomEngine() % possibleRewriteRules.size();
-	int count = 0;
-	std::pair<Rule, std::list<std::list<std::shared_ptr<Node> > > > rewriteRuleWithDataSets;
-	for(const auto& rule : possibleRewriteRules)
-	{
-		if(targetIndex == count)
-		{
-			rewriteRuleWithDataSets = rule;
-			break;
-		}
-		++count;
-	}
-
-	auto& [rewriteRuleName, rewriteRuleSocialConditions, rewriteRuleStoryConditions, rewriteRuleStoryGraph, rewriteRuleNodeModificationArguments, rewriteRuleAppliesOnce] = rewriteRuleWithDataSets.first;
-	PRINTLN("Picked the " + rewriteRuleName + " rewrite rule.");
-	++inRuleUsages[rewriteRuleName];
-	
-	for(const auto& [socialNodeName, socialNode] : rewriteRuleSocialConditions.getNodesByName())
-	{
-		if(auto foundNode = inCast.find<std::string>(socialNodeName); foundNode != inCast.end())
-		{
-			socialNode->setAttribute("name", {"str", foundNode->second->getName()});
-		}
-	}
-
-	std::list<std::list<std::shared_ptr<Node> > > possibleRewriteRuleCasts;
-	DataManager::getInstance()->getWorldGraph().getIsomorphicSubGraphs(rewriteRuleSocialConditions, possibleRewriteRuleCasts);
 
 	bool storyRewritten = false;
-	if(!possibleRewriteRuleCasts.empty())
+	if(!possibleRewriteRules.empty())
 	{
-		targetIndex = randomEngine() % rewriteRuleWithDataSets.second.size();
-		count = 0;
-		std::list<std::shared_ptr<Node> > rewriteRuleDataSet; //This is the node(s) that could be replaced by the rewrite rule
-		for(const auto& dataSet : rewriteRuleWithDataSets.second)
+		PRINTLN("Found " + std::to_string(possibleRewriteRules.size()) + " possible rewrite rules.");
+		int targetIndex = randomEngine() % possibleRewriteRules.size();
+		int count = 0;
+		std::pair<Rule, std::list<std::list<std::shared_ptr<Node> > > > rewriteRuleWithDataSets;
+		for(const auto& rule : possibleRewriteRules)
 		{
 			if(targetIndex == count)
 			{
-				rewriteRuleDataSet = dataSet;
-				break;
-			}
-			++count;
-		}
-		targetIndex = randomEngine() % possibleRewriteRuleCasts.size();
-		count = 0;
-		std::list<std::shared_ptr<Node> > rewriteRuleCast; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
-		for(const auto& dataSet : possibleRewriteRuleCasts)
-		{
-			if(targetIndex == count)
-			{
-				rewriteRuleCast = dataSet;
+				rewriteRuleWithDataSets = rule;
 				break;
 			}
 			++count;
 		}
 
-		count = 0;
-		auto tempCast(inCast);
-		for(const auto& node : rewriteRuleCast)
+		auto& [rewriteRuleName, rewriteRuleSocialConditions, rewriteRuleStoryConditions, rewriteRuleStoryGraph, rewriteRuleNodeModificationArguments, rewriteRuleAppliesOnce] = rewriteRuleWithDataSets.first;
+		PRINTLN("Picked the " + rewriteRuleName + " rewrite rule.");
+		++inRuleUsages[rewriteRuleName];
+		
+		for(const auto& [socialNodeName, socialNode] : rewriteRuleSocialConditions.getNodesByName())
 		{
-			const auto socialNodeName = rewriteRuleSocialConditions.getNodeByIndex(count)->getName();
-			if(auto foundActor = tempCast.find<std::string>(rewriteRuleSocialConditions.getNodeByIndex(count)->getName()); foundActor == tempCast.end())
+			if(auto foundNode = inCast.find<std::string>(socialNodeName); foundNode != inCast.end())
 			{
-				tempCast[socialNodeName] = node;
+				socialNode->setAttribute("name", {"str", foundNode->second->getName()});
 			}
-			++count;
 		}
 
-		const auto rewriteStartNode = *rewriteRuleDataSet.begin();
-		const auto rewriteEndNode = *--rewriteRuleDataSet.end();
+		std::list<std::list<std::shared_ptr<Node> > > possibleRewriteRuleCasts;
+		DataManager::getInstance()->getWorldGraph().getIsomorphicSubGraphs(rewriteRuleSocialConditions, possibleRewriteRuleCasts);
 
-		std::list<std::shared_ptr<Node> > nodesPreviouslyConnectedToRewriteStartNode;
-		std::list<std::shared_ptr<Node> > nodesPreviouslyConnectedToRewriteEndNode;
-
-		while(!rewriteStartNode->getIncomingEdges().empty())
+		if(!possibleRewriteRuleCasts.empty())
 		{
-			auto incomingEdge = *rewriteStartNode->getIncomingEdges().begin();
-			nodesPreviouslyConnectedToRewriteStartNode.emplace_back(incomingEdge->getSourceNode());
-			tempStory.removeEdge(incomingEdge);
-		}
-		while(!rewriteEndNode->getOutgoingEdges().empty())
-		{
-			auto outgoingEdge = *rewriteEndNode->getOutgoingEdges().begin();
-			nodesPreviouslyConnectedToRewriteEndNode.emplace_back(outgoingEdge->getTargetNode());
-			tempStory.removeEdge(outgoingEdge);
-		}
-		tempStory.removeNode(rewriteStartNode);
-		tempStory.removeNode(rewriteEndNode);
-
-		for(auto [storyNodeName, storyNode] : rewriteRuleStoryGraph.getNodesByName())
-		{
-			auto* generatedNode = new Node(*storyNode);
-			while(tempStory.getNodesByName().contains<std::string>(generatedNode->getName()))
+			targetIndex = randomEngine() % rewriteRuleWithDataSets.second.size();
+			count = 0;
+			std::list<std::shared_ptr<Node> > rewriteRuleDataSet; //This is the node(s) that could be replaced by the rewrite rule
+			for(const auto& dataSet : rewriteRuleWithDataSets.second)
 			{
-				generatedNode->setName(generatedNode->getName() + "_");
-			}
-
-			auto addedNode = tempStory.addNode(generatedNode);
-			addedNode->setAttribute("target", {"str", tempCast[storyNode->getAttribute("target").value]->getName()});
-			addedNode->clearEdges();
-			if(storyNode->getIncomingEdges().empty())
-			{
-				for(const auto& nodePreviouslyConnectedToRewriteStartNode : nodesPreviouslyConnectedToRewriteStartNode)
+				if(targetIndex == count)
 				{
-					tempStory.addEdge({"N/A", "N/A"}, nodePreviouslyConnectedToRewriteStartNode, addedNode);
+					rewriteRuleDataSet = dataSet;
+					break;
 				}
+				++count;
 			}
-			if(storyNode->getOutgoingEdges().empty())
+			targetIndex = randomEngine() % possibleRewriteRuleCasts.size();
+			count = 0;
+			std::list<std::shared_ptr<Node> > rewriteRuleCast; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
+			for(const auto& dataSet : possibleRewriteRuleCasts)
 			{
-				for(const auto& nodePreviouslyConnectedToRewriteEndNode : nodesPreviouslyConnectedToRewriteEndNode)
+				if(targetIndex == count)
 				{
-					tempStory.addEdge({"N/A", "N/A"}, addedNode, nodePreviouslyConnectedToRewriteEndNode);
+					rewriteRuleCast = dataSet;
+					break;
 				}
+				++count;
 			}
-			createNodeConditions(rewriteRuleNodeModificationArguments, tempCast, addedNode);
+
+			count = 0;
+			auto tempCast(inCast);
+			for(const auto& node : rewriteRuleCast)
+			{
+				const auto socialNodeName = rewriteRuleSocialConditions.getNodeByIndex(count)->getName();
+				if(auto foundActor = tempCast.find<std::string>(rewriteRuleSocialConditions.getNodeByIndex(count)->getName()); foundActor == tempCast.end())
+				{
+					tempCast[socialNodeName] = node;
+				}
+				++count;
+			}
+
+			const auto rewriteStartNode = *rewriteRuleDataSet.begin();
+			const auto rewriteEndNode = *--rewriteRuleDataSet.end();
+
+			std::list<std::shared_ptr<Node> > nodesPreviouslyConnectedToRewriteStartNode;
+			std::list<std::shared_ptr<Node> > nodesPreviouslyConnectedToRewriteEndNode;
+
+			while(!rewriteStartNode->getIncomingEdges().empty())
+			{
+				auto incomingEdge = *rewriteStartNode->getIncomingEdges().begin();
+				nodesPreviouslyConnectedToRewriteStartNode.emplace_back(incomingEdge->getSourceNode());
+				tempStory.removeEdge(incomingEdge);
+			}
+			while(!rewriteEndNode->getOutgoingEdges().empty())
+			{
+				auto outgoingEdge = *rewriteEndNode->getOutgoingEdges().begin();
+				nodesPreviouslyConnectedToRewriteEndNode.emplace_back(outgoingEdge->getTargetNode());
+				tempStory.removeEdge(outgoingEdge);
+			}
+			tempStory.removeNode(rewriteStartNode);
+			tempStory.removeNode(rewriteEndNode);
+
+			for(auto [storyNodeName, storyNode] : rewriteRuleStoryGraph.getNodesByName())
+			{
+				auto* generatedNode = new Node(*storyNode);
+				while(tempStory.getNodesByName().contains<std::string>(generatedNode->getName()))
+				{
+					generatedNode->setName(generatedNode->getName() + "_");
+				}
+
+				auto addedNode = tempStory.addNode(generatedNode);
+				addedNode->setAttribute("target", {"str", tempCast[storyNode->getAttribute("target").value]->getName()});
+				addedNode->clearEdges();
+				if(storyNode->getIncomingEdges().empty())
+				{
+					for(const auto& nodePreviouslyConnectedToRewriteStartNode : nodesPreviouslyConnectedToRewriteStartNode)
+					{
+						tempStory.addEdge({"N/A", "N/A"}, nodePreviouslyConnectedToRewriteStartNode, addedNode);
+					}
+				}
+				if(storyNode->getOutgoingEdges().empty())
+				{
+					for(const auto& nodePreviouslyConnectedToRewriteEndNode : nodesPreviouslyConnectedToRewriteEndNode)
+					{
+						tempStory.addEdge({"N/A", "N/A"}, addedNode, nodePreviouslyConnectedToRewriteEndNode);
+					}
+				}
+				createNodeConditions(rewriteRuleNodeModificationArguments, tempCast, addedNode);
+			}
+
+
+			for(const auto& [storyEdgeNames, storyEdge] : rewriteRuleStoryGraph.getEdgesByNodesNames())
+			{
+				tempStory.addEdge({"N/A", "N/A"}, storyEdgeNames.first, storyEdgeNames.second);
+			}
+
+			auto lastNode = tempStory.getNodeByIndex(1);
+			lastNode->validateNode({}, true);
+			storyRewritten = lastNode->isValid();
+			PRINTLN("Story valid ? " + std::to_string(storyRewritten));
+
 		}
-
-
-		for(const auto& [storyEdgeNames, storyEdge] : rewriteRuleStoryGraph.getEdgesByNodesNames())
-		{
-			tempStory.addEdge({"N/A", "N/A"}, storyEdgeNames.first, storyEdgeNames.second);
-		}
-
-		auto lastNode = tempStory.getNodeByIndex(1);
-		lastNode->validateNode({}, true);
-		storyRewritten = lastNode->isValid();
-		PRINTLN("Story valid ? " + std::to_string(storyRewritten));
-
 	}
 	outStory = storyRewritten ? tempStory : inStory;
 	return true;

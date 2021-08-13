@@ -8,7 +8,7 @@
     <rewriterule>Ambush</rewriterule>
     <rewriterule>Spare</rewriterule>
   </rewriterules>
-  <numstoriestogenerate>1</numstoriestogenerate>
+  <numstoriestogenerate>100</numstoriestogenerate>
   <maxnumberofrewrites>5</maxnumberofrewrites>
   <metricstooptimize>
   </metricstooptimize>

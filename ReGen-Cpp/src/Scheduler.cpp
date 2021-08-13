@@ -228,7 +228,7 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 	bool storyRewritten = false;
 	if(!possibleRewriteRuleCasts.empty())
 	{
-		targetIndex = targetIndex = randomEngine() % rewriteRuleWithDataSets.second.size();
+		targetIndex = randomEngine() % rewriteRuleWithDataSets.second.size();
 		count = 0;
 		std::list<std::shared_ptr<Node> > rewriteRuleDataSet; //This is the node(s) that could be replaced by the rewrite rule
 		for(const auto& dataSet : rewriteRuleWithDataSets.second)
@@ -240,6 +240,7 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 			}
 			++count;
 		}
+		targetIndex = randomEngine() % possibleRewriteRuleCasts.size();
 		count = 0;
 		std::list<std::shared_ptr<Node> > rewriteRuleCast; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
 		for(const auto& dataSet : possibleRewriteRuleCasts)

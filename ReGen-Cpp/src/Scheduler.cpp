@@ -210,19 +210,6 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 		++count;
 	}
 
-	targetIndex = randomEngine() % rewriteRuleWithDataSets.second.size();
-	count = 0;
-	std::list<std::shared_ptr<Node> > rewriteRuleDataSet; //This is the node(s) that could be replaced by the rewrite rule
-	for(const auto& dataSet : rewriteRuleWithDataSets.second)
-	{
-		if(targetIndex == count)
-		{
-			rewriteRuleDataSet = dataSet;
-			break;
-		}
-		++count;
-	}
-
 	auto& [rewriteRuleName, rewriteRuleSocialConditions, rewriteRuleStoryConditions, rewriteRuleStoryGraph, rewriteRuleNodeModificationArguments, rewriteRuleAppliesOnce] = rewriteRuleWithDataSets.first;
 	PRINTLN("Picked the " + rewriteRuleName + " rewrite rule.");
 	++inRuleUsages[rewriteRuleName];
@@ -235,13 +222,24 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 		}
 	}
 
-
-	bool storyRewritten = false;
 	std::list<std::list<std::shared_ptr<Node> > > possibleRewriteRuleCasts;
 	DataManager::getInstance()->getWorldGraph().getIsomorphicSubGraphs(rewriteRuleSocialConditions, possibleRewriteRuleCasts);
+
+	bool storyRewritten = false;
 	if(!possibleRewriteRuleCasts.empty())
 	{
-		targetIndex = randomEngine() % possibleRewriteRuleCasts.size();
+		targetIndex = targetIndex = randomEngine() % rewriteRuleWithDataSets.second.size();
+		count = 0;
+		std::list<std::shared_ptr<Node> > rewriteRuleDataSet; //This is the node(s) that could be replaced by the rewrite rule
+		for(const auto& dataSet : rewriteRuleWithDataSets.second)
+		{
+			if(targetIndex == count)
+			{
+				rewriteRuleDataSet = dataSet;
+				break;
+			}
+			++count;
+		}
 		count = 0;
 		std::list<std::shared_ptr<Node> > rewriteRuleCast; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
 		for(const auto& dataSet : possibleRewriteRuleCasts)

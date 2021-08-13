@@ -26,9 +26,9 @@ class Test():
         #self._save_output = self._test.get_save_output()
         self._save_output = save_output
 
-        self._output_path = 'Output/' + self._test.get_name() + '/'
+        self._output_path = 'Output/ParityTest/'
         self._final_graph_output = self._output_path + 'Final_Game_States/'
-        self._story_output = self._output_path + 'Generated_Narratives/'
+        self._story_output = self._output_path
         self._stats_output = self._output_path + 'Statistics/'
         self._invalid = 0
         self._valid = 0
@@ -104,7 +104,7 @@ class Test():
                     f.write(str(end_full_narrative - start_full_narrative) + ';' + str(end_init_narrative - start_full_narrative) + ';' + str(end_full_narrative - start_write_narrative) + ';\n')                   
                     
                     if self._save_output:
-                        story.plot_story_graph(self._story_output + 'narrative_' + str(num_stories))
+                        story.plot_story_graph(self._story_output + 'narrative' + str(num_stories - 1))
                      
                     to_remove.append(sched)
                     

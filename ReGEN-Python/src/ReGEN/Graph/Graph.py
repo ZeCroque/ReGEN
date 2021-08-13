@@ -647,34 +647,35 @@ class Graph:
 		file_name (str): The name of the output file
 	"""
 	def plot_story_graph(self, file_name):
-		output_file = open(file_name + ".dot", "w")
-		output_file.write("digraph " + self._name + " {\n")
-		output_file.write("\tnode [ shape = \"record\"]\n")
-		
 		self.fix_node_names()
 		
+		output_file = open(file_name + ".txt", "w")
+
 		#Define our nodes
+		nodesNames = [] 
 		for node in self._nodes:
-			output_file.write("\t" + node.get_name() + " [ label = \"{ " + node.get_name() + " | ")
+			nodesNames.append(node.get_name())
+
+		nodesNames = sorted(nodesNames)
+
+		for nodeName in nodesNames:
+			output_file.write(nodeName + "\n")
 			
-			attr = node.get_attributes()
-			if not attr == None:
-				for i in attr.keys():
-					output_file.write(i + " = " + str(attr[i]) + "\\l")
-			output_file.write(" }\" ]")
-			output_file.write(" [color = ivory4 style = filled fillcolor=ivory1 fontcolor=ivory4]")
-			output_file.write("\n")
-			
-		#Write our edges
-		for edge in self._edges:
-			output_file.write("\t" + edge.get_from_node().get_name() + " -> " + edge.get_to_node().get_name())
-			output_file.write(" [color = ivory4 fontcolor=ivory4]")
-			output_file.write("\n")
-		output_file.write("}\n")
+		output_file.write("\n\n")
+
+		targetNamesBySourceNames = {}
+		for nodeName in nodesNames:
+			targetNamesBySourceNames[nodeName] = []
+			for edge in self._edges:
+				if edge.get_from_node().get_name() == nodeName:
+					targetNamesBySourceNames[nodeName].append(edge.get_to_node().get_name())
+
+		for nodeName in nodesNames:
+			targetNamesBySourceNames[nodeName] = sorted(targetNamesBySourceNames[nodeName])
+			for targetName in targetNamesBySourceNames[nodeName]:	
+				output_file.write(nodeName + " -> " + targetName + "\n")
+
 		output_file.close()
-		
-		command = "dot -Tpng " + file_name + ".dot -o " + file_name + ".png"
-		os.system(command)	
 
 	"""Plot our graph using dot
 	

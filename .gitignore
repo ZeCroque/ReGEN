@@ -2,6 +2,7 @@
 .vscode/
 [Oo]utput/
 [Bb]uild/
+[Tt]esting/
 
 *.ignore.*
 *.ignore/

@@ -455,56 +455,47 @@ void Graph::saveAsDotFile(const std::string& inColor, const std::string& inFontC
 	assert(!std::filesystem::is_regular_file(inOutputPath));
 	
 	const auto fullPathWithoutExtension = inOutputPath + "/" + name;
-	const auto dotFilePath = fullPathWithoutExtension + ".dot";
+	const auto dotFilePath = fullPathWithoutExtension + ".txt";
 	if(std::ofstream file(dotFilePath, std::ios::out | std::ios::trunc); file)
 	{
-		file << "digraph " << name << " {" << std::endl << "node [shape = \"record\"]" << std::endl;
-
+		std::list<std::string> nodesNames;
 		for(const auto& [name, node] : nodesByName)
 		{
-			file << name <<  "[label=\"{" << name << "|";
-			for(const auto& [name, nodeAttribute] : node->attributes)
-			{
-				file << name << "=" << nodeAttribute.value << "\\l";  
-			}
-			file << "}\"] [color=" << inColor << " fontcolor=" << inFontColor << "]" << std::endl;
-			
+			nodesNames.emplace_back(name);
 		}
-		
-		for(auto j = 0; j < nodeCount; ++j)
+
+		nodesNames.sort();
+
+		for(const auto& nodeName : nodesNames)
 		{
-			for(auto i = 0; i < nodeCount; ++i)
-			{
-				const auto edge = edgesByNodesIndex[std::pair{i, j}];
-#ifndef NDEBUG
-				if(inLogAdjacencyMatrix)
-				{
-					PRINT(edge);
-				}
-#endif
-				if(edge)
-				{
-					for(const auto& [attribute, value] : edge->attributes)
-					{
-						file << edge->sourceNode->name << " -> " << edge->targetNode->name;
-						if (attribute != "none")
-						{
-							file << " [label=" << "\"{'" << attribute << "' : '" << value << "'}\"] [color=" << inColor << " fontcolor=" << inFontColor << "]"; 
-						}
-						file << std::endl;
-					}
-				}
-			}
-#ifndef NDEBUG
-			if(inLogAdjacencyMatrix)
-			{
-				PRINTLN("");
-			}
-#endif
+			file << nodeName << std::endl;
 		}
-		file << "}";
+
+		file << std::endl << std::endl;
+
+		std::map<std::string, std::list<std::string> > targetNamesBySourceNames;
+		for(const auto& nodeName : nodesNames)
+		{
+			targetNamesBySourceNames[nodeName] = std::list<std::string>();
+			for(const auto& [edgesNodesNames, edge] : edgesByNodesNames)
+			{
+				if(edgesNodesNames.first == nodeName)
+				{
+					targetNamesBySourceNames[nodeName].emplace_back(edgesNodesNames.second);
+				}
+			}
+		}
+
+		for(auto& [sourceName, targetNames] : targetNamesBySourceNames)
+		{
+			targetNames.sort();
+			for(const auto& targetName : targetNames)
+			{
+				file << sourceName << " -> " << targetName << std::endl;
+			}
+		}
+
 		file.close();
-		system(("dot -Tpng " + dotFilePath + " -o " + fullPathWithoutExtension + ".png").c_str()); //TODO move outside to enable multi-threading
 		return;
 	}
 	assert(false);

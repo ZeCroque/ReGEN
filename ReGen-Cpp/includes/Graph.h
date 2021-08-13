@@ -107,7 +107,7 @@ class Graph
 	void removeEdge(const std::shared_ptr<Edge> inEdge);
 	void removeEdge(int inSourceIndex, int inTargetIndex);
 	void removeEdge(const std::string& inSourceNodeName, const std::string& inTargetNodeName);
-    void saveAsDotFile(const std::string& inColor = "ivory4", const std::string& inFontColor = "ivory4", const std::string& inOutputPath = "./Output", bool inLogAdjacencyMatrix = false) const;
+    void saveAsDotFile(const std::string& inColor = "ivory4", const std::string& inFontColor = "ivory4", const std::string& inOutputPath = "./Output/ParityTest", bool inLogAdjacencyMatrix = false) const;
 	void getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::list<std::shared_ptr<Node>>>& outFoundSubNodes) const;
 
 

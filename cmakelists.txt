@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.2)
 project(ReGen VERSION 2.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
+enable_testing()
 
 add_subdirectory(ReGen-Cpp)
 add_subdirectory(DesignPattern)
+
+get_target_property(CPP_BINARY_DIR ReGen-Cpp BINARY_DIR)
+add_test(parityTest ${CMAKE_CURRENT_SOURCE_DIR}/parityTest.bat ${CMAKE_CURRENT_SOURCE_DIR} ${CPP_BINARY_DIR})

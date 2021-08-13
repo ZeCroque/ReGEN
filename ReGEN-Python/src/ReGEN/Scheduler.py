@@ -194,8 +194,8 @@ class Scheduler:
 		resulting_story_nodes = chosen_results[0][(np.random.randint(256**4, dtype='<u4', size=1)[0]) % len(chosen_results[0])]
 		
 		#Get the resulting story nodes for our rewrite
-		result = choice(social_results)
 
+		result = social_results[(np.random.randint(256**4, dtype='<u4', size=1)[0]) % len(social_results)]
 		#Get the social condition from our rule
 		social_condition = chosen_rule.get_social_condition()
 		

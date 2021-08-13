@@ -8,7 +8,7 @@ cd /D %pythonPath%
 python %pythonPath%/ReGEN-Python/Main.py
 
 cd /D %cppPath%/
-START /WAIT./Release/ReGen-Cpp.exe
+START /WAIT ./Release/ReGen-Cpp.exe
 
 FOR /L %%G IN (0,1,99) DO (
     fc %pythonPath%\Output\ParityTest\narrative%%G.txt %cppPath%\Output\ParityTest\narrative%%G.txt

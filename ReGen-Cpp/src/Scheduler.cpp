@@ -5,7 +5,7 @@
 #include "Rule.h"
 #include "Conditions.h"
 
-std::default_random_engine Scheduler::randomEngine(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
+std::default_random_engine Scheduler::randomEngine = std::mt19937(42);
 std::unordered_map<std::string, int> Scheduler::rulesUsages;  // NOLINT(clang-diagnostic-exit-time-destructors)
 
 Scheduler::Scheduler(std::string inQuestName) : questName(std::move(inQuestName))
@@ -37,9 +37,8 @@ void Scheduler::run()
 		PRINTLN("No possible rules found. Generation failed.");
 		return; //TODO proper failure handling
 	}
-	
-	std::uniform_int_distribution randomIntDistribution{0, static_cast<int>(possibleRules.size()) - 1};
-	int targetIndex = randomIntDistribution(randomEngine);
+
+	size_t targetIndex = randomEngine() % possibleRules.size();
 	int count = 0;
 	std::pair<Rule, std::list<std::list<std::shared_ptr<Node> > > > randomRuleWithDataSets;
 	PRINTLN("Found the following possible rules :");
@@ -59,8 +58,7 @@ void Scheduler::run()
 	PRINTLN("Randomly picked the " + name + " rule.");
 	++rulesUsages[name];
 
-	randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(randomRuleWithDataSets.second.size()) - 1};
-	targetIndex = randomIntDistribution(randomEngine);
+	targetIndex = randomEngine() % randomRuleWithDataSets.second.size();
 	count = 0;
 	std::unordered_map<std::string, std::shared_ptr<Node> > cast;
 	std::list<std::shared_ptr<Node> > randomDataSet;
@@ -199,8 +197,7 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 	}
 
 	PRINTLN("Found " + std::to_string(possibleRewriteRules.size()) + " possible rewrite rules.");
-	std::uniform_int_distribution randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(possibleRewriteRules.size()) - 1};
-	int targetIndex = randomIntDistribution(randomEngine);
+	int targetIndex = randomEngine() % possibleRewriteRules.size();
 	int count = 0;
 	std::pair<Rule, std::list<std::list<std::shared_ptr<Node> > > > rewriteRuleWithDataSets;
 	for(const auto& rule : possibleRewriteRules)
@@ -213,8 +210,7 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 		++count;
 	}
 
-	randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(rewriteRuleWithDataSets.second.size()) - 1};
-	targetIndex = randomIntDistribution(randomEngine);
+	targetIndex = randomEngine() % rewriteRuleWithDataSets.second.size();
 	count = 0;
 	std::list<std::shared_ptr<Node> > rewriteRuleDataSet; //This is the node(s) that could be replaced by the rewrite rule
 	for(const auto& dataSet : rewriteRuleWithDataSets.second)
@@ -245,8 +241,7 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 	DataManager::getInstance()->getWorldGraph().getIsomorphicSubGraphs(rewriteRuleSocialConditions, possibleRewriteRuleCasts);
 	if(!possibleRewriteRuleCasts.empty())
 	{
-		randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(possibleRewriteRuleCasts.size()) - 1};
-		targetIndex = randomIntDistribution(randomEngine);
+		targetIndex = randomEngine() % possibleRewriteRuleCasts.size();
 		count = 0;
 		std::list<std::shared_ptr<Node> > rewriteRuleCast; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
 		for(const auto& dataSet : possibleRewriteRuleCasts)

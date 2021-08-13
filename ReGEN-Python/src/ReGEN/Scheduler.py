@@ -16,6 +16,7 @@ from src.ReGEN.Graph.Condition import Condition
 from src.ReGEN.Metrics.Metrics import Metrics
 from random import *
 from random import choice
+import numpy as np
 import time
 
 from src.ReGEN.Metrics.Metrics import Metrics
@@ -190,7 +191,7 @@ class Scheduler:
 		chosen_rule = chosen_results[1]
 
 		#Get the new story nodes from our results
-		resulting_story_nodes = choice(chosen_results[0])
+		resulting_story_nodes = chosen_results[0][(np.random.randint(256**4, dtype='<u4', size=1)[0]) % len(chosen_results[0])]
 		
 		#Get the resulting story nodes for our rewrite
 		result = choice(social_results)
@@ -303,12 +304,12 @@ class Scheduler:
 			for rule in matching_rules:
 				print "\t" + rule[1].get_name()
 
-		resultant = choice(matching_rules)
+		resultant = matching_rules[(np.random.randint(256**4, dtype='<u4', size=1)[0]) % len(matching_rules)]
 		resulting_rule = resultant[1]
 
 		#Rules for picking the matching group
 		#At the moment it is a random choice
-		resulting_group = choice(resultant[0])
+		resulting_group = resultant[0][(np.random.randint(256**4, dtype='<u4', size=1)[0]) % len(resultant[0])]
 		#-----------------------------------
 		#Now we set the cast for our narrative
 		#-----------------------------------
@@ -468,7 +469,7 @@ class Scheduler:
 	def non_metric_rewrite(self, possible_rules, narrative):
 		
 		#Pick our rule, and its result randomly for a non metric re-write
-		result_rule_pair = choice(possible_rules)
+		result_rule_pair = possible_rules[(np.random.randint(256**4, dtype='<u4', size=1)[0]) % len(possible_rules)]
 		
 		#Get our chosen rule from the pair
 		chosen_rule = result_rule_pair[1]

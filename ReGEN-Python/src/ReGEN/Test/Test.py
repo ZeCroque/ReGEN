@@ -108,22 +108,23 @@ class Test():
                      
                     to_remove.append(sched)
                     
-                    new_paths = story.get_all_paths()
+                    #new_paths = story.get_all_paths()
                         
-                    for path in new_paths:
-                        num_scheds += 1
+                    #for path in new_paths:
+                    #    num_scheds += 1
                         
-                        new_graph = sched.get_social_graph().Copy_Social()
+                    #    new_graph = sched.get_social_graph().Copy_Social()
 
-                        new_graph.modify_according_to_path(path, story)
-                        final_graphs.append(new_graph)
+                    #    new_graph.modify_according_to_path(path, story)
+                    #    final_graphs.append(new_graph)
 
                         #if self._save_output:
                         #    new_graph.plot_social_graph(self._final_graph_output + 'Final_Gamestate_' + str(len(final_graphs)))
                                                       
-                        new_sched = Scheduler(new_graph, story_initialization_rules, story_rewrite_rules, metrics_to_optimize, max_number_of_rewrites, self._stats_output)
-                        to_append.append(new_sched)
-                        
+                    #    new_sched = Scheduler(new_graph, story_initialization_rules, story_rewrite_rules, metrics_to_optimize, max_number_of_rewrites, self._stats_output)
+                    #    to_append.append(new_sched)
+                    new_sched = Scheduler(main_graph, story_initialization_rules, story_rewrite_rules, metrics_to_optimize, max_number_of_rewrites, self._stats_output)
+                    to_append.append(new_sched)   
                     stories.append(story)
                 else:
                     to_remove.append(sched)

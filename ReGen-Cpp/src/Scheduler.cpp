@@ -244,6 +244,9 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 			}
 			++count;
 		}
+
+		randomIntDistribution = std::uniform_int_distribution{0, static_cast<int>(possibleRewriteRuleCasts.size()) - 1};
+		targetIndex = randomIntDistribution(randomEngine);
 		count = 0;
 		std::list<std::shared_ptr<Node> > rewriteRuleCast; //This is the objects that will be used to fill RewriteRule Story targets, with missing NPCs added to cast 
 		for(const auto& dataSet : possibleRewriteRuleCasts)

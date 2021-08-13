@@ -54,8 +54,8 @@ class Test():
         main_graph = self._test.get_social_graph()
         main_graph.initialize()
         
-        if self._save_output:
-            main_graph.plot(self._output_path + 'Initial_Gamestate')
+        #if self._save_output:
+        #   main_graph.plot(self._output_path + 'Initial_Gamestate')
         
         story_initialization_rules = self._test.get_initialization_rules()
         story_rewrite_rules = self._test.get_rewrite_rules()
@@ -118,8 +118,8 @@ class Test():
                         new_graph.modify_according_to_path(path, story)
                         final_graphs.append(new_graph)
 
-                        if self._save_output:
-                            new_graph.plot_social_graph(self._final_graph_output + 'Final_Gamestate_' + str(len(final_graphs)))
+                        #if self._save_output:
+                        #    new_graph.plot_social_graph(self._final_graph_output + 'Final_Gamestate_' + str(len(final_graphs)))
                                                       
                         new_sched = Scheduler(new_graph, story_initialization_rules, story_rewrite_rules, metrics_to_optimize, max_number_of_rewrites, self._stats_output)
                         to_append.append(new_sched)

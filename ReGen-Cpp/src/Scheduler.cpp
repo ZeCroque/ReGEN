@@ -284,13 +284,20 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 			tempStory.removeNode(rewriteStartNode);
 			tempStory.removeNode(rewriteEndNode);
 
+			std::unordered_map<std::string, std::string > newNameDictionary;
+			std::unordered_map<std::string, std::list<CommandData> > copyOfRewriteRuleNodeModificationArguments; //Improve this ugly fix
 			for(auto [storyNodeName, storyNode] : rewriteRuleStoryGraph.getNodesByName())
 			{
 				auto* generatedNode = new Node(*storyNode);
-				while(tempStory.getNodesByName().contains<std::string>(generatedNode->getName()))
+				auto newName = generatedNode->getName();
+				while(tempStory.getNodesByName().contains<std::string>(newName))
 				{
-					generatedNode->setName(generatedNode->getName() + "_");
+					newName += "_";
 				}
+
+				newNameDictionary[storyNodeName] = newName;
+				copyOfRewriteRuleNodeModificationArguments[newName] = rewriteRuleNodeModificationArguments[storyNodeName];
+				generatedNode->setName(newName);
 
 				auto addedNode = tempStory.addNode(generatedNode);
 				addedNode->setAttribute("target", {"str", tempCast[storyNode->getAttribute("target").value]->getName()});
@@ -309,13 +316,13 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 						tempStory.addEdge({"N/A", "N/A"}, addedNode, nodePreviouslyConnectedToRewriteEndNode);
 					}
 				}
-				createNodeConditions(rewriteRuleNodeModificationArguments, tempCast, addedNode);
+				createNodeConditions(copyOfRewriteRuleNodeModificationArguments, tempCast, addedNode);
 			}
 
 
 			for(const auto& [storyEdgeNames, storyEdge] : rewriteRuleStoryGraph.getEdgesByNodesNames())
 			{
-				tempStory.addEdge({"N/A", "N/A"}, storyEdgeNames.first, storyEdgeNames.second);
+				tempStory.addEdge({"N/A", "N/A"},  newNameDictionary[storyEdgeNames.first], newNameDictionary[storyEdgeNames.second]);
 			}
 
 			auto lastNode = tempStory.getNodeByIndex(1);
@@ -324,6 +331,11 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 			PRINTLN("Story valid ? " + std::to_string(storyRewritten));
 
 		}
+	}
+	else
+	{
+		outStory = inStory;
+		return false;
 	}
 	outStory = storyRewritten ? tempStory : inStory;
 	return true;

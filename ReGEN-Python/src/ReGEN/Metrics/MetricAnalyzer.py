@@ -223,8 +223,8 @@ class MetricAnalyzer():
 
 		return_results = {}
 
-		print "----------------------------------- AVERAGES -------------------------"
-		print "\n"
+		#print "----------------------------------- AVERAGES -------------------------"
+		#print "\n"
 	
 		if 'number_of_nodes' in result:
 			average_number_of_nodes = total_number_of_nodes/number_of_quests

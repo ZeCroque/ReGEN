@@ -139,16 +139,16 @@ class StoryNode(Node):
 
 	def validate(self, preconditions_to_check, valid):
 		
-		print "Validating Conditions for: " + self._name
+		#print "Validating Conditions for: " + self._name
 		self._valid = valid and self._valid
 		
 		
 		for pre_condition in preconditions_to_check:
 			for post_condition in self._postconditions:
 				if pre_condition.conflicts(post_condition):
-					print "Invalid"
-					print pre_condition
-					print post_condition
+					#print "Invalid"
+					#print pre_condition
+					#print post_condition
 					self._valid = False
 		
 		new_preconditions = []

@@ -23,7 +23,7 @@ class Test():
         test_reader = XMLTestLayoutReader("Data/", test_name)
         
         self._test = test_reader.readTestLayout()
-        self._test.print_description()
+        #self._test.print_description()
         #self._save_output = self._test.get_save_output()
         self._save_output = save_output
 
@@ -153,12 +153,12 @@ class Test():
             num_iters += 1
         
         for sched in schedulers:
-            print sched.get_valids()
-            print sched.get_invalids()
+           # print sched.get_valids()
+            #print sched.get_invalids()
             self._valid += sched.get_valids()
             self._invalid += sched.get_invalids()
-        print "VALIDDDDD" + str(self._valid)
-        print "INVALIDDDD" + str(self._invalid)
+        #print "VALIDDDDD" + str(self._valid)
+        #print "INVALIDDDD" + str(self._invalid)
         self._stories = stories
         self._final_graphs = final_graphs
         

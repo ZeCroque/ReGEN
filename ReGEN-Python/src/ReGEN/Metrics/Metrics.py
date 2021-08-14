@@ -474,7 +474,7 @@ class Metrics():
 		
 		metrics = self.getMetrics(False)
 		
-		print "----------------------- Metrics --------------------\n"		
+		#print "----------------------- Metrics --------------------\n"		
 		
 		if 'unique_node_types' in metrics:
 			print "\tNumber of Unique Node Types: " + str(metrics['unique_node_types'])

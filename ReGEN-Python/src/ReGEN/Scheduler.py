@@ -142,7 +142,7 @@ class Scheduler:
 		
 		#Check each of our rewrite rules
 		for rule in ruleset:
-			print rule.get_name()
+			#print rule.get_name()
 			#Get the story condition
 			if isinstance(graph, StoryGraph):
 				condition = rule.get_story_condition()
@@ -233,33 +233,33 @@ class Scheduler:
 		self._social_graph.make_node_postconditions(narrative)
 		narrative.initialize_conditions()
 		
-		print "Validating Final Story\n"
+		#print "Validating Final Story\n"
 
-		if self._verbose:
-			print self._divider
-			for node in narrative.get_nodes():
-				
-				print "Preconditions for " + node.get_name()
-				for con in node.get_preconditions():
-					print con
-				print "\nPostconditions for " + node.get_name()
-				for con in node.get_postconditions():
-					print con
-				print "\n" + self._divider	
+		#if self._verbose:
+			#print self._divider
+		#	for node in narrative.get_nodes():
+		#		
+				# "Preconditions for " + node.get_name()
+		#		for con in node.get_preconditions():
+		#			print con
+				#print "\nPostconditions for " + node.get_name()
+		#		for con in node.get_postconditions():
+		#			print con
+		#		#print "\n" + self._divider	
 		
 		valid = narrative.validate_story()
 		updateProfiler()
 		if not valid:
-			print "INVALID STORY"
+		#	print "INVALID STORY"
 			self._invalids += 1
-			print "VALIDS = " + str(self._valids)
-			print "INVALIDS = " + str(self._invalids)
+		#	print "VALIDS = " + str(self._valids)
+		#	print "INVALIDS = " + str(self._invalids)
 			return backup_narrative
 		else:
-			print "VALID STORY"
+		#	print "VALID STORY"
 			self._valids += 1
-			print "VALIDS = " + str(self._valids)
-			print "INVALIDS = " + str(self._invalids)
+		#	print "VALIDS = " + str(self._valids)
+		#	print "INVALIDS = " + str(self._invalids)
 			return narrative
 			
 #--------------------------------------------------------------
@@ -286,25 +286,25 @@ class Scheduler:
 		self._narrative = StoryGraph("New_Quest", [start_node, end_node])
 		self._narrative.initialize()
 		
-		print "Creating Initial Narrative"
+		#print "Creating Initial Narrative"
 		#-----------------------------------
 		#We will go throughout all our rules and find matching results
 		#-----------------------------------
-		print "Searching for Possible Narrative Rules..."
+		#print "Searching for Possible Narrative Rules..."
 		matching_rules = self.get_possible_rules(self._story_init_rules, self._social_graph)
 
-		print "Found " + str(len(matching_rules)) + " possible rules"
+		#print "Found " + str(len(matching_rules)) + " possible rules"
 		if len(matching_rules) <= 0:
-			print "ERROR - No Matching Rules found, No more stories may be created"
+			#print "ERROR - No Matching Rules found, No more stories may be created"
 			return False
 			
 		#Rules for picking the matching narrative
 		#At the moment it is a random choice
 
-		if self._verbose:
-			print "Found the Following Matching Initialization Rules: "
-			for rule in matching_rules:
-				print "\t" + rule[1].get_name()
+		#if self._verbose:
+			#print "Found the Following Matching Initialization Rules: "
+			#for rule in matching_rules:
+				#print "\t" + rule[1].get_name()
 
 		resultant = choice(matching_rules)
 		resulting_rule = resultant[1]
@@ -411,15 +411,15 @@ class Scheduler:
 		self._social_graph.make_node_postconditions(self._final_narrative)
 		self._final_narrative.initialize_conditions()
 		
-		print "-------------------------------------------------\n"
-		for node in self._final_narrative.get_nodes():
+		#print "-------------------------------------------------\n"
+		#for node in self._final_narrative.get_nodes():
 			
-			print "Preconditions for " + node.get_name()
-			for con in node.get_preconditions():
-				print con
-			print "\nPostconditions for " + node.get_name()
-			for con in node.get_postconditions():
-				print con
+		#	print "Preconditions for " + node.get_name()
+		#	for con in node.get_preconditions():
+		#		print con
+		#	print "\nPostconditions for " + node.get_name()
+		#	for con in node.get_postconditions():
+		#		print con
 		
 		#-----------------------------------
 		#Begin the process of rewriting the narrative

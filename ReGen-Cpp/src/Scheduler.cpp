@@ -1,5 +1,7 @@
 #include "Scheduler.h"
 
+#include <psapi.h>
+
 #include "CommandsRegistry.h"
 #include "DataManager.h"
 #include "Rule.h"
@@ -7,6 +9,19 @@
 
 std::default_random_engine Scheduler::randomEngine(static_cast<unsigned>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
 std::unordered_map<std::string, int> Scheduler::rulesUsages;  // NOLINT(clang-diagnostic-exit-time-destructors)
+size_t Scheduler::maxVirtualMem = 0;
+size_t Scheduler::maxPhysicalMem = 0;
+size_t Scheduler::minVirtualMem = std::numeric_limits<size_t>::max();
+size_t Scheduler::minPhysicalMem = std::numeric_limits<size_t>::max();
+size_t Scheduler::virtualMemSum = 0;
+size_t Scheduler::physMemSum = 0;
+size_t Scheduler::measureCount = 0;
+double Scheduler::maxCpuUsage = 0.;
+double Scheduler::minCpuUsage = std::numeric_limits<double>::max();
+double Scheduler::cpuUsageSum = 0.;
+ULARGE_INTEGER Scheduler::lastCPU, Scheduler::lastSysCPU, Scheduler::lastUserCPU;
+int Scheduler::numProcessors = 0;
+HANDLE Scheduler::self = 0;
 
 Scheduler::Scheduler(std::string inQuestName) : questName(std::move(inQuestName))
 {
@@ -109,6 +124,7 @@ void Scheduler::run()
 		count = 0;
 		for(const auto& node : randomDataSet)
 		{
+			updateProfiler();
 			if(count == index)
 			{
 				const auto generatedNode = resultStory.addNode(new Node(*storyNode));
@@ -140,7 +156,7 @@ void Scheduler::run()
 	{
 		rewriteRulesUsages[name] = 0;
 	}
-
+	updateProfiler();
 	bool canRewrite = true;
 	int rewriteCount = 0;
 	Graph& finalStory = resultStory;
@@ -152,8 +168,8 @@ void Scheduler::run()
 		++rewriteCount;
 	}
 	PRINTLN("Stopped rewriting: " + std::string(canRewrite ? "Max rewrite count reached." : "No rewrite rules available."));
-
-	finalStory.saveAsDotFile();
+	updateProfiler();
+	//finalStory.saveAsDotFile();
 }
 
 void Scheduler::getPossibleRules(const std::list<Rule>& inRuleSet, const Graph& inGraph, const std::unordered_map<std::string, int>& inRuleUsages, std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction>& outPossibleRules)
@@ -323,6 +339,7 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 					}
 				}
 				createNodeConditions(copyOfRewriteRuleNodeModificationArguments, tempCast, addedNode);
+				updateProfiler();
 			}
 
 
@@ -335,11 +352,12 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 			lastNode->validateNode({}, true);
 			storyRewritten = lastNode->isValid();
 			PRINTLN("Story valid ? " + std::to_string(storyRewritten));
-
+			updateProfiler();
 		}
 	}
 	else
 	{
+		updateProfiler();
 		outStory = inStory;
 		return false;
 	}
@@ -372,4 +390,62 @@ void Scheduler::createNodeConditions(const std::unordered_map<std::string, std::
 #ifndef NDEBUG
 	printNodeConditions(inNode->getName(), inNode->getConditionsBlock());
 #endif
+}
+
+void Scheduler::init()
+{
+    SYSTEM_INFO sysInfo;
+    FILETIME ftime, fsys, fuser;
+
+    GetSystemInfo(&sysInfo);
+    numProcessors = sysInfo.dwNumberOfProcessors;
+
+    GetSystemTimeAsFileTime(&ftime);
+    memcpy(&lastCPU, &ftime, sizeof(FILETIME));
+
+    self = GetCurrentProcess();
+    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+    memcpy(&lastSysCPU, &fsys, sizeof(FILETIME));
+    memcpy(&lastUserCPU, &fuser, sizeof(FILETIME));
+}
+
+void Scheduler::updateProfiler()
+{
+	MEMORYSTATUSEX memInfo;
+	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
+	GlobalMemoryStatusEx(&memInfo);
+	DWORDLONG totalVirtualMem = memInfo.ullTotalPageFile;
+	PROCESS_MEMORY_COUNTERS_EX pmc;
+	GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc), sizeof(pmc));
+	maxVirtualMem = std::max(pmc.PrivateUsage, maxVirtualMem);
+	minVirtualMem = std::min(pmc.PrivateUsage, minVirtualMem);
+	virtualMemSum += pmc.PrivateUsage;
+	maxPhysicalMem = std::max(pmc.WorkingSetSize, maxPhysicalMem);
+	minPhysicalMem = std::min(pmc.WorkingSetSize, minPhysicalMem);
+	physMemSum += pmc.WorkingSetSize;
+
+	FILETIME ftime, fsys, fuser;
+    ULARGE_INTEGER now, sys, user;
+    double percent;
+
+    GetSystemTimeAsFileTime(&ftime);
+    memcpy(&now, &ftime, sizeof(FILETIME));
+
+    GetProcessTimes(self, &ftime, &ftime, &fsys, &fuser);
+    memcpy(&sys, &fsys, sizeof(FILETIME));
+    memcpy(&user, &fuser, sizeof(FILETIME));
+    percent = (sys.QuadPart - lastSysCPU.QuadPart) +
+        (user.QuadPart - lastUserCPU.QuadPart);
+    percent /= (now.QuadPart - lastCPU.QuadPart);
+    percent /= numProcessors;
+    lastCPU = now;
+    lastUserCPU = user;
+    lastSysCPU = sys;
+
+    const auto percentMultiplied = percent * 100;
+	maxCpuUsage = std::max(percentMultiplied, maxCpuUsage);
+	minCpuUsage = std::min(percentMultiplied, minCpuUsage);
+	cpuUsageSum += percentMultiplied;
+
+	++measureCount;
 }

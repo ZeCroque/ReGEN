@@ -5,6 +5,7 @@
 #include <pugixml.hpp>
 
 #include "Conditions.h"
+#include "Scheduler.h"
 #include "Utils.h"
 
 Node::Node() : bIsValid(true), index(NONE)
@@ -585,6 +586,7 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 		{
 			for(int j = 0; j < inSearchedGraph.nodeCount; ++j)
 			{
+				Scheduler::updateProfiler();
 				if(static_cast<int>(inSearchedGraph.adjacencyList.at(i,j)) && !static_cast<int>(ullmanMatrix.at(i,j)))
 				{
 					isSubGraph = false;
@@ -640,6 +642,7 @@ void Graph::getIsomorphicSubGraphs(const Graph& inSearchedGraph, std::list<std::
 					break;
 				}
 			}
+			Scheduler::updateProfiler();
 		}
 
 		//Then we check the first one with the last one

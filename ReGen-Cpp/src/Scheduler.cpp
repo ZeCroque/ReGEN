@@ -29,7 +29,7 @@ void Scheduler::run()
 	resultStory.addNode(new Node("End_Quest", {{"Node_Type", {"str", "End"}}}));
 	
 	PRINTLN("Searching for Possible Narrative Rules...");
-	std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRules;
+	std::list<std::pair<Rule, std::list<std::list<std::shared_ptr<Node> > > > > possibleRules;
 	getPossibleRules(DataManager::getInstance()->getInitializationRules(), DataManager::getInstance()->getWorldGraph(), rulesUsages, possibleRules);
 	PRINTLN(std::string("Found ") + std::to_string(possibleRules.size()) + " possible rules.");
 	if(possibleRules.empty())
@@ -154,7 +154,7 @@ void Scheduler::run()
 	finalStory.saveAsDotFile();
 }
 
-void Scheduler::getPossibleRules(const std::list<Rule>& inRuleSet, const Graph& inGraph, const std::unordered_map<std::string, int>& inRuleUsages, std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction>& outPossibleRules)
+void Scheduler::getPossibleRules(const std::list<Rule>& inRuleSet, const Graph& inGraph, const std::unordered_map<std::string, int>& inRuleUsages, std::list<std::pair<Rule, std::list<std::list<std::shared_ptr<Node> > > > >& outPossibleRules)
 {
 	for(const auto& rule : inRuleSet)
 	{
@@ -176,7 +176,7 @@ void Scheduler::getPossibleRules(const std::list<Rule>& inRuleSet, const Graph& 
 			}
 			if(!dataSet.empty())
 			{
-				outPossibleRules[rule] = dataSet;
+				outPossibleRules.push_back({rule, dataSet});
 			}
 		}
 	}
@@ -189,7 +189,7 @@ bool Scheduler::rewriteStory(const Graph& inStory, const std::unordered_map<std:
 	PRINT_SEPARATOR();
 	PRINTLN("Checking rewrite rules...");
 	Graph tempStory(inStory);
-	std::unordered_map<Rule, std::list<std::list<std::shared_ptr<Node> > >, RuleHashFunction> possibleRewriteRules;
+	std::list<std::pair<Rule, std::list<std::list<std::shared_ptr<Node> > > > > possibleRewriteRules;
 	getPossibleRules(DataManager::getInstance()->getRewriteRules(), tempStory, inRuleUsages, possibleRewriteRules);
 
 	bool storyRewritten = false;

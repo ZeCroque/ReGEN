@@ -1,14 +1,20 @@
 <test name="One_Story_Test" save_output="True">
   <socialgraph>Fantasy_World_Improved_Autogen</socialgraph>
   <initializationrules>
-    <initializationrule>Murder</initializationrule>
+    <initializationrule>Assassinate</initializationrule>
     <initializationrule>Fight</initializationrule>
+    <initializationrule>Give_Blackmail_Letter</initializationrule>
+    <initializationrule>Give_Gift</initializationrule>
+    <initializationrule>Murder</initializationrule>
+    <initializationrule>Murder_Blackmailer</initializationrule>
+    <initializationrule>Rebel</initializationrule>
   </initializationrules>
   <rewriterules>
     <rewriterule>Ambush</rewriterule>
+    <rewriterule>Encounter</rewriterule>
     <rewriterule>Spare</rewriterule>
   </rewriterules>
-  <numstoriestogenerate>100</numstoriestogenerate>
+  <numstoriestogenerate>25</numstoriestogenerate>
   <maxnumberofrewrites>5</maxnumberofrewrites>
   <metricstooptimize>
   </metricstooptimize>

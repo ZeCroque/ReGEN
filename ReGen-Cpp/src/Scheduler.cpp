@@ -124,7 +124,6 @@ void Scheduler::run()
 		count = 0;
 		for(const auto& node : randomDataSet)
 		{
-			updateProfiler();
 			if(count == index)
 			{
 				const auto generatedNode = resultStory.addNode(new Node(*storyNode));
@@ -134,6 +133,7 @@ void Scheduler::run()
 				
 				break;
 			}
+			updateProfiler();
 			++count;
 		}
 	}

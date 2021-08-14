@@ -8,7 +8,8 @@
 
 from src.ReGEN.Graph.Node import Node
 from src.ReGEN.Graph.Edge import Edge
-from src.ReGEN.Graph.Graph import Graph
+from src.ReGEN.Graph.Graph import *
+from src.ReGEN.Graph.Globals import *
 from src.ReGEN.Graph.StoryGraph import StoryGraph
 from src.ReGEN.Graph.StoryNode import StoryNode
 from src.ReGEN.Graph.SocialGraph import SocialGraph
@@ -17,6 +18,7 @@ from src.ReGEN.Metrics.Metrics import Metrics
 from random import *
 from random import choice
 import time
+import src.ReGEN.Graph.Globals as globals
 
 from src.ReGEN.Metrics.Metrics import Metrics
 from src.ReGEN.Metrics.MetricAnalyzer import MetricAnalyzer
@@ -246,6 +248,7 @@ class Scheduler:
 				print "\n" + self._divider	
 		
 		valid = narrative.validate_story()
+		updateProfiler()
 		if not valid:
 			print "INVALID STORY"
 			self._invalids += 1
@@ -435,6 +438,7 @@ class Scheduler:
 		# Start applying the rewrite rules
 		#-----------------------------------
 		#While we can, attempt to apply rewrite rules to the narrative
+		updateProfiler()
 		while can_rewrite and (num_rewrites < self._max_number_of_rewrites):
 			
 			#Get all rules which could possibly be applied
@@ -456,11 +460,12 @@ class Scheduler:
 					self.non_metric_rewrite(possible_rules, self._final_narrative)
 			
 			else:
+				updateProfiler()
 				can_rewrite = False
 			
 			#After each iteration, update our number of rewrites
 			num_rewrites += 1
-		
+		updateProfiler()
 		return self._final_narrative
 			
 	"""Perform a Graph Rewrite without using metrics

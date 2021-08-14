@@ -10,6 +10,7 @@ from src.ReGEN.Metrics.MetricAnalyzer import MetricAnalyzer
 from src.ReGEN.Scheduler import Scheduler
 import os
 import time
+import src.ReGEN.Graph.Globals as globals
 
 class Test():
     
@@ -46,10 +47,21 @@ class Test():
         start = time.time()
         self.get_narratives()
         end = time.time()
-        self.analyze_narratives()
+        #self.analyze_narratives()
         f = open(self._stats_output + 'total_time.txt', 'w')
-        f.write("Narrative Generation Completed in : " + str(end - start) + " seconds")
-        
+        f.write("Narrative Generation Completed in : " + str(end - start) + " seconds" + "\n")
+        f.write("Max RAM usage : " + str(globals.maxRamUsage / (1024 * 1024)) + "Mio \n")
+        f.write("Min RAM usage : " + str(globals.minRamUsage / (1024 * 1024)) + "Mio \n")
+        f.write("Average RAM usage : " + str((globals.sumRamUsage / globals.measureCount) / (1024 * 1024)) + "Mio \n")
+        f.write("Max Virtual RAM usage : " + str(globals.maxVirtualRamUsage / (1024 * 1024)) + "Mio \n")
+        f.write("Min Virtual RAM usage : " + str(globals.minVirtualRamUsage / (1024 * 1024)) + "Mio \n")
+        f.write("Average Virtual RAM usage : " + str((globals.sumVirtualRamUsage / globals.measureCount) / (1024 * 1024)) + "Mio \n")
+
+        f.write("Max CPU usage : " + str(globals.maxCPU) + "%\n")
+        f.write("Min CPU usage : " + str(globals.minCPU) + "%\n")
+        f.write("Average CPU usage : " + str(globals.sumCPU) + "%\n")
+
+
     def get_narratives(self):
         main_graph = self._test.get_social_graph()
         main_graph.initialize()
@@ -78,11 +90,11 @@ class Test():
         num_iters = 0
         run = True
 
-        f = open(self._stats_output + 'general_time_stats.txt', 'w')
-        f.write("totaltime;inittime;writetime;\n")
+        #f = open(self._stats_output + 'general_time_stats.txt', 'w')
+        #f.write("totaltime;inittime;writetime;\n")
 
-        f = open(self._stats_output + 'detailed_time_stats.txt', 'w')
-        f.write("metric_rewriting;validation;\n")
+        #f = open(self._stats_output + 'detailed_time_stats.txt', 'w')
+        #f.write("metric_rewriting;validation;\n")
         
         while num_stories < self._test.get_number_of_stories_to_generate() and run == True:
             final_graphs = []
@@ -100,11 +112,11 @@ class Test():
                     story = sched.write_narrative()
                     end_full_narrative = time.time()
 
-                    f = open(self._stats_output + 'general_time_stats.txt', 'a')
-                    f.write(str(end_full_narrative - start_full_narrative) + ';' + str(end_init_narrative - start_full_narrative) + ';' + str(end_full_narrative - start_write_narrative) + ';\n')                   
+                    #f = open(self._stats_output + 'general_time_stats.txt', 'a')
+                    #f.write(str(end_full_narrative - start_full_narrative) + ';' + str(end_init_narrative - start_full_narrative) + ';' + str(end_full_narrative - start_write_narrative) + ';\n')                   
                     
-                    if self._save_output:
-                        story.plot_story_graph(self._story_output + 'narrative_' + str(num_stories))
+                   # if self._save_output:
+                     #   story.plot_story_graph(self._story_output + 'narrative_' + str(num_stories))
                      
                     to_remove.append(sched)
                     

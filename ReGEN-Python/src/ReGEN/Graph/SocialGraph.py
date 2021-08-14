@@ -224,6 +224,7 @@ class SocialGraph(Graph):
 
 				else:
 					print "Modification Error"
+				updateProfiler()
 
 	def Copy_Social(self):
 		

@@ -12,6 +12,27 @@ from Edge import *
 from numpy import *
 from itertools import *
 import os
+
+import src.ReGEN.Graph.Globals as globals
+import psutil
+
+def updateProfiler():
+	process = psutil.Process(os.getpid())
+	memoryInfo = process.memory_info()
+	globals.maxRamUsage = max(globals.maxRamUsage, memoryInfo[0])
+	globals.minRamUsage = min(globals.minRamUsage, memoryInfo[0])
+	globals.sumRamUsage += memoryInfo[0] 
+	globals.maxVirtualRamUsage = max(globals.maxVirtualRamUsage, memoryInfo[1])
+	globals.minVirtualRamUsage = min(globals.minVirtualRamUsage, memoryInfo[1])
+	globals.sumVirtualRamUsage += memoryInfo[1]
+
+	cpuPercent = process.cpu_percent()
+	globals.maxCPU = max(globals.maxCPU, cpuPercent)
+	globals.minCPU = min(globals.minCPU, cpuPercent)
+	globals.sumCPU += cpuPercent 
+
+	globals.measureCount += 1
+
 class Graph:
 	
 	"""The initialization function
@@ -562,6 +583,7 @@ class Graph:
 		
 			for i in range(self._p_a):
 				for j in range(self._p_a):
+					updateProfiler()
 					if self._a[i][j] == 1:
 						if not C[i][j] == 1:
 							isomorphism = False

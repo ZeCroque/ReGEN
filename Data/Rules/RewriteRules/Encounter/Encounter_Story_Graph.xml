@@ -2,7 +2,7 @@
   <nodes>
     <node modification="Encounter_Modification.xml" name="Encounter">
       <attr name="target" type="str">
-        <value>Monster</value>
+        <value>Monster_</value>
       </attr>
       <attr name="nodetype" type="str">
         <value>Fight</value>

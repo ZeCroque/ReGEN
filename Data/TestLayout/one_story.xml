@@ -1,18 +1,14 @@
 <test name="One_Story_Test" save_output="True">
-  <socialgraph>Fantasy_World_Improved_Autogen</socialgraph>
+  <socialgraph>Skyrim_With_Enemies</socialgraph>
   <initializationrules>
-    <initializationrule>Assassinate</initializationrule>
-    <initializationrule>Fight</initializationrule>
-    <initializationrule>Give_Blackmail_Letter</initializationrule>
     <initializationrule>Give_Gift</initializationrule>
     <initializationrule>Murder</initializationrule>
-    <initializationrule>Murder_Blackmailer</initializationrule>
-    <initializationrule>Rebel</initializationrule>
+    <initializationrule>Fight</initializationrule>
   </initializationrules>
   <rewriterules>
     <rewriterule>Ambush</rewriterule>
-    <rewriterule>Encounter</rewriterule>
     <rewriterule>Spare</rewriterule>
+    <rewriterule>Stolen_Gift</rewriterule>
   </rewriterules>
   <numstoriestogenerate>25</numstoriestogenerate>
   <maxnumberofrewrites>5</maxnumberofrewrites>

@@ -1,0 +1,18 @@
+<graph name="MaxDensity" type="Social_Graph">
+  <nodes>
+    <node name="Invoker">
+    </node>
+    <node name="Other">
+    </node>
+    <node name="Other2">
+    </node>
+  </nodes>
+  <connections>
+    <connection from="Invoker" to="Other">
+      <relation Lives="N/A"/>
+    </connection>
+    <connection from="Invoker" to="Other2">
+      <relation Owns="N/A"/>
+    </connection>
+  </connections>
+</graph>

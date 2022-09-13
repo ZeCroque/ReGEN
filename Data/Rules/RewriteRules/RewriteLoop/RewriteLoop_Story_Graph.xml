@@ -1,0 +1,25 @@
+<graph name="RewriteLoop_Story_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="Dummy_Event">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+    <node modification="None" name="Dummy_Event_2">
+      <attr name="target" type="str">
+        <value>Invoker</value>
+      </attr>
+      <attr name="nodetype" type="str">
+        <value>Info</value>
+      </attr>
+    </node>
+  </nodes>
+  <connections>
+    <connection from="Dummy_Event" to="Dummy_Event_2">
+      <relation none="none"/>
+    </connection>
+  </connections>
+</graph>

@@ -1,0 +1,4 @@
+<rule name="MaxDensity" type="Initialization_Rule">
+  <socialcondition>MaxDensity_Social_Condition</socialcondition>
+  <storymodification>MaxDensity_Story_Modification</storymodification>
+</rule>

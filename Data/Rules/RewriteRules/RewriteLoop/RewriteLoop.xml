@@ -1,0 +1,5 @@
+<rule applyonce="false" name="RewriteLoop" type="Rewrite_Rule">
+  <socialcondition>RewriteLoop_Social_Condition</socialcondition>
+  <storycondition>RewriteLoop_Story_Condition</storycondition>
+  <storymodification>RewriteLoop_Story_Modification</storymodification>
+</rule>

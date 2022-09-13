@@ -1,0 +1,4 @@
+<rule name="NoRequirements" type="Initialization_Rule">
+  <socialcondition>NoRequirements_Social_Condition</socialcondition>
+  <storymodification>NoRequirements_Story_Modification</storymodification>
+</rule>

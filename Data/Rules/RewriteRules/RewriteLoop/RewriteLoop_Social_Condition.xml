@@ -1,0 +1,7 @@
+<graph name="RewriteLoop_Social_Condition" type="Social_Graph">
+  <nodes>
+    <node name="Invoker">
+    </node>
+  </nodes>
+  <connections/>
+</graph>

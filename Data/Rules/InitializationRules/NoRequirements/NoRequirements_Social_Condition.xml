@@ -1,0 +1,7 @@
+<graph name="NoRequirements" type="Social_Graph">
+  <nodes>
+    <node name="Invoker">
+    </node>
+  </nodes>
+  <connections/>
+</graph>

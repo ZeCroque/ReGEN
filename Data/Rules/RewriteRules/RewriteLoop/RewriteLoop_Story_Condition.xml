@@ -1,0 +1,9 @@
+<graph name="RewriteLoop_Story_Condition" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="Dummy_Event">
+      <target>Invoker</target>
+      <nodetype>Info</nodetype>
+    </node>
+  </nodes>
+  <connections/>
+</graph>

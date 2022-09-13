@@ -1,0 +1,10 @@
+<graph name="NoRequirements_Story" type="Story_Graph">
+  <nodes>
+    <node modification="None" name="Dummy_Event">
+      <target>Invoker</target>
+      <nodetype>Info</nodetype>
+    </node>
+  </nodes>
+  <connections>
+  </connections>
+</graph>
